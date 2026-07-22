@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoS</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app">
+
+    <nav class="tabs">
+      <div class="tabs-indicator" id="tabsIndicator"></div>
+      <button class="tab-btn active" data-tab="home" type="button" data-i18n="tab_home">Home</button>
+      <button class="tab-btn" data-tab="settings" type="button" data-i18n="tab_settings">Settings</button>
+      <button class="tab-btn" data-tab="support" type="button" data-i18n="tab_support">Support</button>
+    </nav>
+
+    <main class="pages"> 
+
+      <section class="page active" id="page-home">
+
+        <div class="card toggle-card">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-title" data-i18n="home_screamers_title">Screamers</span>
+              <span class="toggle-desc" data-i18n="home_screamers_desc">Random jump scares during your stream</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggleScreamers">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-panel" id="panelScreamers">
+            <div class="toggle-panel-inner">
+              <div class="toggle-panel-inner-content">
+                <span class="field-label" data-i18n="home_interval_label">Scare interval (minutes)</span>
+                <div class="range-row">
+                  <input type="number" id="intervalMin" class="num-input" value="3" min="1" max="60">
+                  <span class="range-sep">–</span>
+                  <input type="number" id="intervalMax" class="num-input" value="7" min="1" max="60">
+                </div>
+                <p class="hint" data-i18n="home_interval_hint">We recommend a 3-minute minimum so you have time to get into the game before it finds you.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card toggle-card">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-title" data-i18n="home_chatvote_title">Chat Vote</span>
+              <span class="toggle-desc" data-i18n="home_chatvote_desc">Let viewers vote for the next scare</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggleChatVote">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-panel" id="panelChatVote">
+            <div class="toggle-panel-inner">
+              <div class="toggle-panel-inner-content">
+                <span class="field-label" data-i18n="home_obs_label">Connect the widget to OBS</span>
+                <ol class="obs-steps">
+                  <li data-i18n="home_obs_step1">Open OBS → Sources → click +</li>
+                  <li data-i18n="home_obs_step2">Select "Browser"</li>
+                  <li data-i18n="home_obs_step3">Paste the widget link (generated here later)</li>
+                  <li data-i18n="home_obs_step4">Set size to 400×200 and place it in a corner</li>
+                </ol>
+                <p class="hint hint-warning" data-i18n="home_obs_warning">⚠️ Please don't peek at OBS — let's keep the surprise, the fear and the fun intact!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card list-card">
+          <div class="list-header">
+            <span class="list-title" data-i18n="home_list_title">Screamers</span>
+            <div class="list-header-actions">
+              <button class="icon-btn icon-btn-ghost" id="refreshScreamersBtn" title="Refresh" type="button">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 4v6h-6"/>
+                  <path d="M1 20v-6h6"/>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/>
+                  <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+              </button>
+              <button class="icon-btn" id="addScreamerBtn" title="Add screamer" type="button">+</button>
+            </div>
+          </div>
+          <div class="screamer-list" id="screamerList"></div>
+        </div>
+
+      </section>
+
+      <section class="page" id="page-settings">
+
+        <div class="card">
+          <div class="settings-item">
+            <span class="settings-label" data-i18n="settings_language">Language</span>
+            <select class="lang-select" id="langSelect">
+              <option value="en" selected>English</option>
+              <option value="ru">Русский</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <span class="section-label" data-i18n="settings_connections">Connections</span>
+
+          <div class="connection-row">
+            <div class="connection-info">
+              <span class="platform-icon" style="background:#9146FF">TW</span>
+              <div class="connection-text">
+                <span class="connection-name" data-i18n="settings_twitch">Twitch</span>
+                <span class="connection-status" id="twitchStatus" data-i18n="settings_not_connected">Not connected</span>
+              </div>
+            </div>
+            <button class="connect-btn" id="twitchBtn" type="button" data-i18n="settings_connect">Connect</button>
+          </div>
+
+          <div class="connection-row">
+            <div class="connection-info">
+              <span class="platform-icon" style="background:#000000">TT</span>
+              <div class="connection-text">
+                <span class="connection-name" data-i18n="settings_tiktok">TikTok</span>
+                <span class="connection-status" id="tiktokStatus" data-i18n="settings_not_connected">Not connected</span>
+              </div>
+            </div>
+            <button class="connect-btn" id="tiktokBtn" type="button" data-i18n="settings_connect">Connect</button>
+          </div>
+
+          <div class="connection-row disabled-row">
+            <div class="connection-info">
+              <span class="platform-icon" style="background:#FF0000">YT</span>
+              <div class="connection-text">
+                <span class="connection-name" data-i18n="settings_youtube">YouTube</span>
+                <span class="connection-status" data-i18n="settings_soon">Coming soon</span>
+              </div>
+            </div>
+            <button class="connect-btn" type="button" disabled data-i18n="settings_connect">Connect</button>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="page" id="page-support">
+
+        <div class="card">
+          <span class="section-label" data-i18n="support_title">Support the project</span>
+          <p class="hint" style="margin-bottom:12px;" data-i18n="support_hint">SoS is free. If you'd like to help keep it that way, you can send a tip below — no pressure, ever.</p>
+
+          <div class="donate-list">
+            <a href="https://ko-fi.com/scream_on_stream" class="donate-card" target="_blank" rel="noopener">
+              <span class="donate-icon" style="background:#da7340">Kf</span>
+              <span class="donate-name">Ko-fi</span>
+              <span class="donate-arrow">→</span>
+            </a>
+            <a href="https://www.donationalerts.com/r/scream_on_stream" class="donate-card" target="_blank" rel="noopener">
+              <span class="donate-icon" style="background:#FF5500">DA</span>
+              <span class="donate-name">DonationAlerts</span>
+              <span class="donate-arrow">→</span>
+            </a>
+            <a href="https://donatepay.eu/don/48484" class="donate-card" target="_blank" rel="noopener">
+              <span class="donate-icon" style="background:#8A2BE2">DP</span>
+              <span class="donate-name">DonatePay</span>
+              <span class="donate-arrow">→</span>
+            </a>
+            <a href="https://www.patreon.com/cw/Scream_on_Stream" class="donate-card" target="_blank" rel="noopener">
+              <span class="donate-icon" style="background:#000000">P</span>
+              <span class="donate-name">Patreon</span>
+              <span class="donate-arrow">→</span>
+            </a>
+            <a href="https://boosty.to/scream_on_stream" class="donate-card" target="_blank" rel="noopener">
+              <span class="donate-icon" style="background:#F97316">B</span>
+              <span class="donate-name">Boosty</span>
+              <span class="donate-arrow">→</span>
+            </a>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <div class="lang-modal" id="langModal">
+    <div class="lang-modal-card">
+      <span class="lang-modal-title" data-i18n="lang_modal_title">Choose your language</span>
+      <span class="lang-modal-subtitle" data-i18n="lang_modal_subtitle">You can change this anytime in Settings</span>
+      <div class="lang-modal-options">
+        <button class="lang-option" data-lang="en" type="button">English</button>
+        <button class="lang-option" data-lang="ru" type="button">Русский</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="add-modal" id="addModal">
+    <div class="add-modal-card">
+      <button class="add-modal-close" id="addModalClose" type="button" aria-label="Close">&times;</button>
+      <div class="dropzone" id="dropzone">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+        </svg>
+      </div>
+      <p class="dropzone-hint" id="dropzoneHint" data-i18n="add_dropzone_hint">To add your own files, drag them here, or choose manually.</p>
+    </div>
+  </div>
+
+  <div class="name-modal" id="nameModal">
+    <div class="name-modal-card">
+      <button class="add-modal-close" id="nameModalClose" type="button" aria-label="Close">&times;</button>
+      <span class="name-modal-progress" id="nameModalProgress"></span>
+      <span class="name-modal-title" data-i18n="name_modal_title">Name this file</span>
+      <span class="name-modal-original" id="nameModalOriginal"></span>
+      <input class="name-modal-input" id="nameModalInput" type="text" data-i18n-placeholder="name_modal_placeholder" placeholder="Enter a name for the file">
+      <button class="name-modal-confirm" id="nameModalConfirm" type="button" data-i18n="name_modal_confirm">Add</button>
+    </div>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
