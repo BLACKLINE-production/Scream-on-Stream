@@ -43,7 +43,7 @@ The project was created by **BLACKLINE productions** studio.
 1. **Add your files.** On the *Home* tab, click `+` and drag and drop video or audio - these will be your jumpscares.
 2. **Turn on Screamers.** Set the minimum and maximum interval between scares in minutes.
 3. **(Optional) Enable Chat Vote.** The app will prompt viewers to choose one of three random options each time.
-4. **Подключите чат.** **Connect chat.** In the *Settings* tab, link your Twitch channel or TikTok LIVE so that votes from the chat are counted automatically.
+4. **Connect chat.** In the *Settings* tab, link your Twitch channel or TikTok LIVE so that votes from the chat are counted automatically.
 5. **Add the widget to OBS.** Copy the widget link from the *Home* tab, add the **Browser** source to OBS, paste the link and set the size to 400x300.
 6. **Start your stream—and don't peek at OBS.** Let the scare be unexpected for you, too.
 
