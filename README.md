@@ -80,16 +80,17 @@ Project website: **[scream-on-stream.pages.dev](https://scream-on-stream.pages.d
 
 **⚠️ Windows SmartScreen Warning**
 
-**When running the installer, Windows may display a warning saying "Windows protected your PC".**
+When running the installer, Windows may display a warning saying "Windows protected your PC".
 
-**This is a standard warning for new applications without a paid code-signing certificate. The application is completely safe and 100% open-source.**
+This is a standard warning for new applications without a paid code-signing certificate. The application is completely safe and 100% open-source.
 
-**How to install:**
+How to install:
 
-  **1. Click "More info"**
+  1. Click "More info"
 
-  **2. Click "Run anyway"**
+  2. Click "Run anyway"
 
+<br>
 <br>
 
 <sub>Developed by **BLACKLINE productions**</sub>
