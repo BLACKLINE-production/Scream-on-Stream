@@ -144,9 +144,9 @@ Before using this project, please read the license terms / Перед испол
 
 ## ✉️ Contacts / Контакты
 
-For questions, suggestions and cooperation **[scream.on.stream@gmail.com](mailto:scream.on.stream@gmail.com)** / По вопросам, предложениям и сотрудничеству: **[scream.on.stream@gmail.com](mailto:scream.on.stream@gmail.com)**
+For questions, suggestions and cooperation / По вопросам, предложениям и сотрудничеству: **[scream.on.stream@gmail.com](mailto:scream.on.stream@gmail.com)**
 
-Project website **[scream-on-stream.pages.dev](https://scream-on-stream.pages.dev/)** / Сайт проекта: **[scream-on-stream.pages.dev](https://scream-on-stream.pages.dev/)**
+Project website / Сайт проекта: **[scream-on-stream.pages.dev](https://scream-on-stream.pages.dev/)**
 
 ---
 
@@ -157,6 +157,14 @@ Project website **[scream-on-stream.pages.dev](https://scream-on-stream.pages.de
 ### Ready to scare yourself and your audience? / Готов испугать себя и свою аудиторию?
 
 [![DOWNLOAD](https://img.shields.io/badge/⬇%20DOWNLOAD%20v0.1.0-8A2BE2?style=for-the-badge&logoColor=white&labelColor=C71585)](https://github.com/BLACKLINE-production/Scream-on-Stream/releases/tag/v0.1.0)
+
+<br>
+
+> **⚠️ Windows SmartScreen Warning / Предупреждение Windows SmartScreen**
+>
+> 🇬🇧 Windows may show "Windows protected your PC" — this is normal for new apps without a paid code-signing certificate. The app is 100% safe and open-source. Just click **"More info" → "Run anyway"**.
+>
+> 🇷🇺 Windows может показать "Windows защитила ваш компьютер" — это стандартно для новых приложений без платного сертификата подписи. Приложение на 100% безопасно и с открытым исходным кодом. Просто нажми **"Подробнее" → "Выполнить в любом случае"**.
 
 <br>
 <br>
