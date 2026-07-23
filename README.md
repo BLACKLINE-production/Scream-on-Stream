@@ -86,9 +86,9 @@ This is a standard warning for new applications without a paid code-signing cert
 
 How to install:
 
-  1. Click "More info"
+1. Click "More info"
 
-  2. Click "Run anyway"
+2. Click "Run anyway"
 
 <br>
 <br>
