@@ -144,9 +144,9 @@ Before using this project, please read the license terms / Перед испол
 
 ## ✉️ Contacts / Контакты
 
-For questions, suggestions and cooperation / По вопросам, предложениям и сотрудничеству: **[scream.on.stream@gmail.com](mailto:scream.on.stream@gmail.com)**
+For questions, suggestions and cooperation **[scream.on.stream@gmail.com](mailto:scream.on.stream@gmail.com)** / По вопросам, предложениям и сотрудничеству: **[scream.on.stream@gmail.com](mailto:scream.on.stream@gmail.com)**
 
-Project website / Сайт проекта: **[scream-on-stream.pages.dev](https://scream-on-stream.pages.dev/)**
+Project website **[scream-on-stream.pages.dev](https://scream-on-stream.pages.dev/)** / Сайт проекта: **[scream-on-stream.pages.dev](https://scream-on-stream.pages.dev/)**
 
 ---
 
