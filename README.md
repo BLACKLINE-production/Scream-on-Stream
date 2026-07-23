@@ -4,8 +4,8 @@
 
 ### Be scared, scare your viewers. Keep the stream alive.
 
-*Screamers-приложение для стримеров: случайные джампскейры прямо во время эфира,*
-*голосование чата за следующий испуг и виджет для OBS в один клик.*
+*Screamer on Stream is an app for streamers or those who like to get scared: random jumpscares right during the broadcast,*
+*Chat voting for the next screamer and a widget for OBS in one click.*
 
 [![License](https://img.shields.io/badge/License-читать-8A2BE2?style=for-the-badge&labelColor=0a0a0a)](https://github.com/BLACKLINE-production/Scream-on-Stream?tab=License-1-ov-file)
 [![Website](https://img.shields.io/badge/Сайт-scream--on--stream.pages.dev-C71585?style=for-the-badge&labelColor=0a0a0a)](https://scream-on-stream.pages.dev/)
