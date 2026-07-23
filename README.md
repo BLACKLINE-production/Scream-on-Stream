@@ -78,6 +78,19 @@ Project website: **[scream-on-stream.pages.dev](https://scream-on-stream.pages.d
 
 [![DOWNLOAD](https://img.shields.io/badge/⬇%20DOWNLOAD%20v0.1.0-8A2BE2?style=for-the-badge&logoColor=white&labelColor=C71585)](https://github.com/BLACKLINE-production/Scream-on-Stream/releases/tag/v0.1.0)
 
+**⚠️ Windows SmartScreen Warning**
+
+**When running the installer, Windows may display a warning saying "Windows protected your PC".**
+
+**This is a standard warning for new applications without a paid code-signing certificate. The application is completely safe and 100% open-source.**
+
+**How to install:**
+
+  **1. Click "More info"**
+
+  **2. Click "Run anyway"**
+
+
 <sub>Developed by **BLACKLINE productions**</sub>
 
 </div>
