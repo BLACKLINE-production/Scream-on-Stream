@@ -1,3 +1,5 @@
+mod autostart;
+mod hotkey;
 mod media;
 mod scare;
 mod tiktok;
@@ -9,17 +11,32 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     Manager, WindowEvent,
 };
+use tauri_plugin_global_shortcut::ShortcutState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(
+            tauri_plugin_global_shortcut::Builder::new()
+                .with_handler(|app, _shortcut, event| {
+                    if event.state == ShortcutState::Pressed {
+                        let _ = scare::panic_button(app.clone());
+                    }
+                })
+                .build(),
+        )
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
         .manage(scare::PendingScare::default())
         .manage(scare::AutoScareState::default())
         .manage(scare::MasterVolume::default())
         .manage(vote::VoteState::default())
         .manage(vote::WidgetServer::default())
+        .manage(hotkey::PanicHotkeyState::default())
         .invoke_handler(tauri::generate_handler![
             media::list_screamers,
             media::add_screamer_files,
@@ -28,6 +45,7 @@ pub fn run() {
             scare::trigger_scare,
             scare::take_scare_media,
             scare::force_close_scare,
+            scare::panic_button,
             scare::start_random_scares,
             scare::stop_random_scares,
             scare::set_master_volume,
@@ -42,11 +60,17 @@ pub fn run() {
             twitch::disconnect_twitch_chat,
             tiktok::connect_tiktok_chat,
             tiktok::disconnect_tiktok_chat,
+            hotkey::set_panic_hotkey,
+            autostart::set_autostart,
+            autostart::get_autostart_enabled,
         ])
         .setup(|app| {
             let app_handle = app.handle().clone();
             if let Err(e) = media::ensure_media_dirs(&app_handle) {
                 eprintln!("Failed to prepare Media folder: {e}");
+            }
+            if let Err(e) = hotkey::register_default(&app_handle) {
+                eprintln!("Failed to register the panic button hotkey: {e}");
             }
 
             let show_i = MenuItem::with_id(app, "show", "Open", true, None::<&str>)?;

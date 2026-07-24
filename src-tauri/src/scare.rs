@@ -5,6 +5,9 @@ use serde::Serialize;
 use std::sync::Mutex;
 use std::time::Duration;
 use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, WebviewUrl, WebviewWindowBuilder};
+use tokio::sync::Notify;
+
+pub const PANIC_COOLDOWN_SECS: u64 = 5;
 
 #[derive(Serialize, Clone)]
 pub struct ScareMedia {
@@ -21,7 +24,6 @@ impl Default for PendingScare {
     }
 }
 
-/// Master volume applied to every screamer (0.0 - 1.0).
 pub struct MasterVolume(pub Mutex<f32>);
 
 impl Default for MasterVolume {
@@ -108,8 +110,25 @@ pub struct AutoScareInner {
     generation: u64,
 }
 
-#[derive(Default)]
-pub struct AutoScareState(Mutex<AutoScareInner>);
+pub struct AutoScareState {
+    inner: Mutex<AutoScareInner>,
+    panic_notify: Notify,
+}
+
+impl Default for AutoScareState {
+    fn default() -> Self {
+        AutoScareState {
+            inner: Mutex::new(AutoScareInner::default()),
+            panic_notify: Notify::new(),
+        }
+    }
+}
+
+impl AutoScareState {
+    pub fn signal_panic(&self) {
+        self.panic_notify.notify_waiters();
+    }
+}
 
 #[tauri::command]
 pub async fn start_random_scares(
@@ -125,7 +144,7 @@ pub async fn start_random_scares(
     }
 
     let generation = {
-        let mut inner = state.0.lock().map_err(|e| e.to_string())?;
+        let mut inner = state.inner.lock().map_err(|e| e.to_string())?;
         inner.generation += 1;
         inner.generation
     };
@@ -136,22 +155,35 @@ pub async fn start_random_scares(
 
     tauri::async_runtime::spawn(async move {
         loop {
+            if !is_current_generation(&app, generation) {
+                return;
+            }
+
             let mut winner_id: Option<String> = None;
+            let mut panicked = false;
 
             if chat_vote {
                 let started = vote::start_vote_round(app.clone(), app.state::<vote::VoteState>());
                 match started {
                     Ok(candidates) if !candidates.is_empty() => {
-                        tokio::time::sleep(Duration::from_secs(vote_secs)).await;
+                        let auto_state = app.state::<AutoScareState>();
+                        tokio::select! {
+                            _ = tokio::time::sleep(Duration::from_secs(vote_secs)) => {}
+                            _ = auto_state.panic_notify.notified() => { panicked = true; }
+                        }
 
                         if !is_current_generation(&app, generation) {
                             let _ = vote::cancel_vote_round(app.state::<vote::VoteState>());
                             return;
                         }
 
-                        winner_id = vote::resolve_vote_round(app.state::<vote::VoteState>())
-                            .ok()
-                            .flatten();
+                        if panicked {
+                            let _ = vote::cancel_vote_round(app.state::<vote::VoteState>());
+                        } else {
+                            winner_id = vote::resolve_vote_round(app.state::<vote::VoteState>())
+                                .ok()
+                                .flatten();
+                        }
                     }
                     _ => {
 
@@ -159,15 +191,30 @@ pub async fn start_random_scares(
                 }
             }
 
-            let wait_secs = if max_secs > min_secs {
-                rand::thread_rng().gen_range(min_secs..=max_secs)
-            } else {
-                min_secs
-            };
-            tokio::time::sleep(Duration::from_secs(wait_secs)).await;
+            if !panicked {
+                let wait_secs = if max_secs > min_secs {
+                    rand::thread_rng().gen_range(min_secs..=max_secs)
+                } else {
+                    min_secs
+                };
 
-            if !is_current_generation(&app, generation) {
-                return;
+                let auto_state = app.state::<AutoScareState>();
+                tokio::select! {
+                    _ = tokio::time::sleep(Duration::from_secs(wait_secs)) => {}
+                    _ = auto_state.panic_notify.notified() => { panicked = true; }
+                }
+
+                if !is_current_generation(&app, generation) {
+                    return;
+                }
+            }
+
+            if panicked {
+                tokio::time::sleep(Duration::from_secs(PANIC_COOLDOWN_SECS)).await;
+                if !is_current_generation(&app, generation) {
+                    return;
+                }
+                continue;
             }
 
             if let Some(id) = winner_id {
@@ -187,7 +234,7 @@ pub async fn start_random_scares(
 
 fn is_current_generation(app: &AppHandle, generation: u64) -> bool {
     let auto_state = app.state::<AutoScareState>();
-    match auto_state.0.lock() {
+    match auto_state.inner.lock() {
         Ok(guard) => guard.generation == generation,
         Err(_) => false,
     }
@@ -195,7 +242,7 @@ fn is_current_generation(app: &AppHandle, generation: u64) -> bool {
 
 #[tauri::command]
 pub fn stop_random_scares(state: tauri::State<AutoScareState>) -> Result<(), String> {
-    let mut inner = state.0.lock().map_err(|e| e.to_string())?;
+    let mut inner = state.inner.lock().map_err(|e| e.to_string())?;
     inner.generation += 1;
     Ok(())
 }
@@ -211,5 +258,19 @@ pub fn force_close_scare(app: AppHandle) -> Result<(), String> {
     if let Some(window) = app.get_webview_window("scare") {
         window.close().map_err(|e| e.to_string())?;
     }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn panic_button(app: AppHandle) -> Result<(), String> {
+    force_close_scare(app.clone())?;
+
+    {
+        let pending = app.state::<PendingScare>();
+        let mut guard = pending.0.lock().map_err(|e| e.to_string())?;
+        *guard = None;
+    }
+
+    app.state::<AutoScareState>().signal_panic();
     Ok(())
 }

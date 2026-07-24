@@ -45,6 +45,8 @@ const translations = {
     home_volume_label: 'Master Volume',
     home_volume_hint: 'Applies to every screamer — videos and sounds alike.',
     settings_language: 'Language',
+    settings_autostart: 'Launch on PC startup',
+    settings_autostart_hint: "SoS will start automatically every time you turn on your PC — no need to open it manually before you go live.",
     settings_connections: 'Connections',
     settings_twitch: 'Twitch',
     settings_tiktok: 'TikTok',
@@ -85,6 +87,16 @@ const translations = {
     connect_tiktok_hint: 'Get a free key at <a href="https://tik.tools/login" target="_blank" rel="noopener">tik.tools</a> — takes about 30 seconds.',
     connect_modal_confirm: 'Connect',
     connect_modal_connecting: 'Connecting…',
+    settings_panic_title: 'Panic Button',
+    settings_panic_hint: "Instantly kills whatever scare is currently playing — video, sound, everything — no matter what triggered it. Timers and chat vote keep running underneath.",
+    settings_panic_hotkey_label: 'Hotkey',
+    settings_panic_change: 'Change',
+    settings_panic_cancel_btn: 'Cancel',
+    settings_panic_recording: 'Press keys…',
+    settings_panic_vote_hint: 'If Chat Vote is on, the next vote round appears about 5 seconds after you use the panic button.',
+    settings_panic_error_modifier: 'Pick at least one modifier key (Ctrl, Alt or Shift).',
+    settings_panic_error_key: "That key isn't supported — try a letter, number, F-key, or Space.",
+    settings_panic_error_taken: 'That combination is already used by another app on this system.',
   },
   ru: {
     tab_home: 'Главная',
@@ -107,6 +119,8 @@ const translations = {
     home_volume_label: 'Общая громкость',
     home_volume_hint: 'Действует на все скримеры — и на видео, и на звуки.',
     settings_language: 'Язык',
+    settings_autostart: 'Запуск при включении ПК',
+    settings_autostart_hint: 'SoS будет запускаться автоматически при каждом включении компьютера — не нужно открывать его вручную перед стримом.',
     settings_connections: 'Подключения',
     settings_twitch: 'Twitch',
     settings_tiktok: 'TikTok',
@@ -147,6 +161,16 @@ const translations = {
     connect_tiktok_hint: 'Бесплатный ключ можно получить на <a href="https://tik.tools/login" target="_blank" rel="noopener">tik.tools</a> — займёт секунд 30.',
     connect_modal_confirm: 'Подключить',
     connect_modal_connecting: 'Подключение…',
+    settings_panic_title: 'Паник-кнопка',
+    settings_panic_hint: 'Мгновенно вырубает текущий скример — видео, звук, всё — независимо от того, что его запустило. Таймеры и голосование чата продолжают работать.',
+    settings_panic_hotkey_label: 'Горячая клавиша',
+    settings_panic_change: 'Изменить',
+    settings_panic_cancel_btn: 'Отмена',
+    settings_panic_recording: 'Нажми комбинацию…',
+    settings_panic_vote_hint: 'Если голосование чата включено, новое голосование появится примерно через 5 секунд после паник-кнопки.',
+    settings_panic_error_modifier: 'Выбери хотя бы один модификатор (Ctrl, Alt или Shift).',
+    settings_panic_error_key: 'Эта клавиша не поддерживается — попробуй букву, цифру, F-клавишу или пробел.',
+    settings_panic_error_taken: 'Эта комбинация уже занята другим приложением в системе.',
   },
 };
 
@@ -673,10 +697,6 @@ document.getElementById('tiktokBtn').addEventListener('click', async () => {
   openConnectModal('tiktok');
 });
 
-// --- Connect modal (Twitch / TikTok) ---------------------------------------
-// Replaces window.prompt(), which is a native OS dialog that isn't confined
-// to (and can be clipped by) the app's own window bounds.
-
 const connectModal = document.getElementById('connectModal');
 const connectModalClose = document.getElementById('connectModalClose');
 const connectModalIcon = document.getElementById('connectModalIcon');
@@ -836,6 +856,144 @@ document.querySelectorAll('.donate-card').forEach((link) => {
   });
 });
 
+
+const PANIC_DEFAULT_PAYLOAD = { code: 'KeyP', ctrl: true, alt: true, shift: false, meta: false };
+
+const panicHotkeyBadge = document.getElementById('panicHotkeyBadge');
+const panicHotkeyChangeBtn = document.getElementById('panicHotkeyChangeBtn');
+const panicHotkeyError = document.getElementById('panicHotkeyError');
+
+let recordingHotkey = false;
+let currentHotkeyPayload = PANIC_DEFAULT_PAYLOAD;
+
+function codeToDisplay(code) {
+  if (code.startsWith('Key')) return code.slice(3);
+  if (code.startsWith('Digit')) return code.slice(5);
+  return code; 
+}
+
+function buildHotkeyDisplay({ code, ctrl, alt, shift, meta }) {
+  const parts = [];
+  if (ctrl) parts.push('Ctrl');
+  if (alt) parts.push('Alt');
+  if (shift) parts.push('Shift');
+  if (meta) parts.push('Win');
+  parts.push(codeToDisplay(code));
+  return parts.join('+');
+}
+
+function isSupportedHotkeyCode(code) {
+  return /^Key[A-Z]$/.test(code) || /^Digit[0-9]$/.test(code) || /^F([1-9]|1[0-2])$/.test(code) || code === 'Space';
+}
+
+function setPanicError(key) {
+  panicHotkeyError.textContent = key ? translations[currentLang][key] : '';
+}
+
+function stopRecordingHotkey() {
+  recordingHotkey = false;
+  document.removeEventListener('keydown', onHotkeyKeydown, true);
+  panicHotkeyBadge.classList.remove('recording');
+  panicHotkeyBadge.textContent = buildHotkeyDisplay(currentHotkeyPayload);
+  panicHotkeyChangeBtn.textContent = translations[currentLang].settings_panic_change;
+}
+
+async function onHotkeyKeydown(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (e.key === 'Escape') {
+    stopRecordingHotkey();
+    return;
+  }
+  if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) {
+    return;
+  }
+
+  const payload = {
+    code: e.code,
+    ctrl: e.ctrlKey,
+    alt: e.altKey,
+    shift: e.shiftKey,
+    meta: e.metaKey,
+  };
+
+  if (!payload.ctrl && !payload.alt && !payload.shift) {
+    setPanicError('settings_panic_error_modifier');
+    return;
+  }
+  if (!isSupportedHotkeyCode(payload.code)) {
+    setPanicError('settings_panic_error_key');
+    return;
+  }
+
+  try {
+    await invoke('set_panic_hotkey', payload);
+    setPanicError(null);
+    currentHotkeyPayload = payload;
+    localStorage.setItem('sos_panic_hotkey', JSON.stringify(payload));
+  } catch (err) {
+    console.error('Failed to set panic hotkey:', err);
+    setPanicError('settings_panic_error_taken');
+  }
+
+  stopRecordingHotkey();
+}
+
+panicHotkeyChangeBtn.addEventListener('click', () => {
+  if (recordingHotkey) {
+    stopRecordingHotkey();
+    return;
+  }
+  recordingHotkey = true;
+  setPanicError(null);
+  panicHotkeyBadge.classList.add('recording');
+  panicHotkeyBadge.textContent = translations[currentLang].settings_panic_recording;
+  panicHotkeyChangeBtn.textContent = translations[currentLang].settings_panic_cancel_btn;
+  document.addEventListener('keydown', onHotkeyKeydown, true);
+});
+
+async function initPanicHotkey() {
+  let saved = null;
+  try {
+    saved = JSON.parse(localStorage.getItem('sos_panic_hotkey'));
+  } catch (e) {
+    saved = null;
+  }
+  const payload = saved && saved.code ? saved : PANIC_DEFAULT_PAYLOAD;
+  currentHotkeyPayload = payload;
+  panicHotkeyBadge.textContent = buildHotkeyDisplay(payload);
+  try {
+    await invoke('set_panic_hotkey', payload);
+  } catch (e) {
+    console.error('Failed to apply saved panic hotkey, keeping default:', e);
+    currentHotkeyPayload = PANIC_DEFAULT_PAYLOAD;
+    panicHotkeyBadge.textContent = buildHotkeyDisplay(PANIC_DEFAULT_PAYLOAD);
+  }
+}
+
+const toggleAutostartEl = document.getElementById('toggleAutostart');
+
+toggleAutostartEl.addEventListener('change', async () => {
+  const enabled = toggleAutostartEl.checked;
+  try {
+    await invoke('set_autostart', { enabled });
+  } catch (e) {
+    console.error('Failed to update autostart setting:', e);
+    toggleAutostartEl.checked = !enabled;
+  }
+});
+
+async function initAutostart() {
+  try {
+    toggleAutostartEl.checked = await invoke('get_autostart_enabled');
+  } catch (e) {
+    console.error('Failed to read autostart setting:', e);
+  }
+}
+
 initLanguage();
 loadScreamers();
 initMasterVolume();
+initPanicHotkey();
+initAutostart();

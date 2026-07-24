@@ -130,6 +130,17 @@
         </div>
 
         <div class="card">
+          <div class="settings-item">
+            <span class="settings-label" data-i18n="settings_autostart">Launch on PC startup</span>
+            <label class="switch">
+              <input type="checkbox" id="toggleAutostart">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+          <p class="hint" style="margin-top:8px;" data-i18n="settings_autostart_hint">SoS will start automatically every time you turn on your PC — no need to open it manually before you go live.</p>
+        </div>
+
+        <div class="card">
           <span class="section-label" data-i18n="settings_connections">Connections</span>
 
           <div class="connection-row">
@@ -164,6 +175,22 @@
             </div>
             <button class="connect-btn" type="button" disabled data-i18n="settings_connect">Connect</button>
           </div>
+        </div>
+
+        <div class="card">
+          <span class="section-label" data-i18n="settings_panic_title">Panic Button</span>
+          <p class="hint" data-i18n="settings_panic_hint">Instantly kills whatever scare is currently playing — video, sound, everything — no matter what triggered it. Timers and chat vote keep running underneath.</p>
+
+          <div class="settings-item panic-hotkey-row">
+            <span class="settings-label" data-i18n="settings_panic_hotkey_label">Hotkey</span>
+            <div class="hotkey-controls">
+              <kbd class="hotkey-badge" id="panicHotkeyBadge">Ctrl+Alt+P</kbd>
+              <button class="connect-btn" id="panicHotkeyChangeBtn" type="button" data-i18n="settings_panic_change">Change</button>
+            </div>
+          </div>
+
+          <p class="hint hint-warning panic-hotkey-error" id="panicHotkeyError"></p>
+          <p class="hint" data-i18n="settings_panic_vote_hint">If Chat Vote is on, the next vote round appears about 5 seconds after you use the panic button.</p>
         </div>
 
       </section>
