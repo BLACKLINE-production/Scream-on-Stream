@@ -38,6 +38,7 @@ async function start() {
   el.src = convertFileSrc(media.path);
   el.autoplay = true;
   el.controls = false;
+  el.volume = Math.min(1, Math.max(0, typeof media.volume === 'number' ? media.volume : 1));
   el.style.display = media.kind === 'video' ? 'block' : 'none';
 
   el.addEventListener('ended', closeOverlay);

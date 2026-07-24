@@ -1,6 +1,7 @@
 const { invoke } = window.__TAURI__.core;
 const { open } = window.__TAURI__.dialog;
 const { getCurrentWebview } = window.__TAURI__.webview;
+const { openUrl } = window.__TAURI__.opener;
 
 const VIDEO_EXTS = ['mp4', 'webm', 'mov', 'mkv', 'avi'];
 const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'm4a'];
@@ -34,12 +35,15 @@ const translations = {
     home_chatvote_title: 'Chat Vote',
     home_chatvote_desc: 'Let viewers vote for the next scare',
     home_obs_label: 'Connect the widget to OBS',
-    home_obs_step1: 'Open OBS → Sources → click +',
-    home_obs_step2: 'Select "Browser"',
-    home_obs_step3: 'Paste the widget link (generated here later)',
-    home_obs_step4: 'Set size to 400×200 and place it in a corner',
+    home_obs_step1: 'Connect your account in the "Settings" section',
+    home_obs_step2: 'Open OBS → Sources → click +',
+    home_obs_step3: 'Select "Browser"',
+    home_obs_step4: 'Paste the link to the widget (located below)',
+    home_obs_step5: ' Set size to 400×300 and place it in a corner',
     home_obs_warning: "⚠️ Please don't peek at OBS — let's keep the surprise, the fear and the fun intact!",
     home_list_title: 'Screamers',
+    home_volume_label: 'Master Volume',
+    home_volume_hint: 'Applies to every screamer — videos and sounds alike.',
     settings_language: 'Language',
     settings_connections: 'Connections',
     settings_twitch: 'Twitch',
@@ -60,6 +64,27 @@ const translations = {
     name_modal_placeholder: 'Enter a name for the file',
     name_modal_confirm: 'Add',
     name_modal_progress_multi: (i, n) => `File ${i} of ${n}`,
+    home_votetime_label: 'Vote duration (seconds)',
+    widget_link_copy: 'Copy link',
+    widget_link_copied: 'Copied!',
+    twitch_prompt_channel: 'Enter your Twitch channel name (no @):',
+    twitch_connect_error: "Couldn't connect to that Twitch channel. Check the name and try again.",
+    tiktok_prompt_username: 'Enter your TikTok username (no @):',
+    tiktok_prompt_apikey: 'Enter your TikTok API key (free key at tik.tools):',
+    tiktok_connect_error: "Couldn't connect. Check your username and API key (get a free one at tik.tools) and make sure you're LIVE.",
+    connect_twitch_title: 'Connect Twitch',
+    connect_twitch_subtitle: "We'll read your chat to count votes.",
+    connect_twitch_label: 'Channel name',
+    connect_twitch_placeholder: 'your channel',
+    connect_tiktok_title: 'Connect TikTok',
+    connect_tiktok_subtitle: "We'll read your chat to count votes.",
+    connect_tiktok_label_username: 'TikTok username',
+    connect_tiktok_placeholder_username: 'your username',
+    connect_tiktok_label_apikey: 'API key',
+    connect_tiktok_placeholder_apikey: 'Paste your API key',
+    connect_tiktok_hint: 'Get a free key at <a href="https://tik.tools/login" target="_blank" rel="noopener">tik.tools</a> — takes about 30 seconds.',
+    connect_modal_confirm: 'Connect',
+    connect_modal_connecting: 'Connecting…',
   },
   ru: {
     tab_home: 'Главная',
@@ -72,12 +97,15 @@ const translations = {
     home_chatvote_title: 'Голосование чата',
     home_chatvote_desc: 'Пусть зрители голосуют за следующий скример',
     home_obs_label: 'Подключение виджета к OBS',
-    home_obs_step1: 'Открой OBS → Источники → нажми +',
-    home_obs_step2: 'Выбери «Браузер»',
-    home_obs_step3: 'Вставь ссылку на виджет (сгенерируется здесь позже)',
-    home_obs_step4: 'Задай размер 400×200 и размести в углу экрана',
+    home_obs_step1: 'Подключи аккаунт в разделе "Настройки"',
+    home_obs_step2: 'Открой OBS → Источники → нажми +',
+    home_obs_step3: 'Выбери «Браузер»',
+    home_obs_step4: 'Вставь ссылку на виджет (находится ниже)',
+    home_obs_step5: 'Задай размер 400×300 и размести в углу экрана',
     home_obs_warning: '⚠️ Пожалуйста, не подглядывай в OBS — давай сохраним интригу, страх и веселье!',
     home_list_title: 'Скримеры',
+    home_volume_label: 'Общая громкость',
+    home_volume_hint: 'Действует на все скримеры — и на видео, и на звуки.',
     settings_language: 'Язык',
     settings_connections: 'Подключения',
     settings_twitch: 'Twitch',
@@ -94,10 +122,31 @@ const translations = {
     lang_modal_subtitle: 'Вы всегда сможете изменить это в настройках',
     add_dropzone_hint: 'Для добавления своих файлов перетащите их сюда, либо выберите вручную.',
     add_dropzone_hint_error: 'Поддерживаются только видео и аудио файлы.',
-    name_modal_title: 'Назовите файл, оно будет использоваться в голосовани',
+    name_modal_title: 'Назовите файл, название будет использоваться в голосовани',
     name_modal_placeholder: 'Введите название для файла',
     name_modal_confirm: 'Добавить',
     name_modal_progress_multi: (i, n) => `Файл ${i} из ${n}`,
+    home_votetime_label: 'Время голосования (в секундах)',
+    widget_link_copy: 'Скопировать ссылку',
+    widget_link_copied: 'Скопировано!',
+    twitch_prompt_channel: 'Введите название вашего Twitch-канала (без @):',
+    twitch_connect_error: 'Не удалось подключиться к этому Twitch-каналу. Проверьте название и попробуйте снова.',
+    tiktok_prompt_username: 'Введите ваш TikTok-юзернейм (без @):',
+    tiktok_prompt_apikey: 'Введите ваш TikTok API-ключ (бесплатный — на tik.tools):',
+    tiktok_connect_error: 'Не удалось подключиться. Проверьте юзернейм и API-ключ (бесплатный можно получить на tik.tools), и убедитесь, что у вас идёт LIVE.',
+    connect_twitch_title: 'Подключить Twitch',
+    connect_twitch_subtitle: 'Мы будем читать чат, чтобы считать голоса.',
+    connect_twitch_label: 'Название канала',
+    connect_twitch_placeholder: 'your channel',
+    connect_tiktok_title: 'Подключить TikTok',
+    connect_tiktok_subtitle: 'Мы будем читать чат, чтобы считать голоса.',
+    connect_tiktok_label_username: 'Юзернейм TikTok',
+    connect_tiktok_placeholder_username: 'your username',
+    connect_tiktok_label_apikey: 'API-ключ',
+    connect_tiktok_placeholder_apikey: 'Вставьте ваш API-ключ',
+    connect_tiktok_hint: 'Бесплатный ключ можно получить на <a href="https://tik.tools/login" target="_blank" rel="noopener">tik.tools</a> — займёт секунд 30.',
+    connect_modal_confirm: 'Подключить',
+    connect_modal_connecting: 'Подключение…',
   },
 };
 
@@ -117,10 +166,18 @@ function applyLanguage(lang) {
     if (dict[key]) el.placeholder = dict[key];
   });
 
+  document.querySelectorAll('[data-i18n-title]').forEach((el) => {
+    const key = el.dataset.i18nTitle;
+    if (dict[key]) el.title = dict[key];
+  });
+
   document.documentElement.lang = lang;
   document.getElementById('langSelect').value = lang;
 
   refreshConnectionTexts();
+  if (widgetLinkInput && widgetLinkInput.value) {
+    widgetLinkInput.value = widgetLinkInput.value.replace(/lang=\w+/, `lang=${lang}`);
+  }
   localStorage.setItem('sos_lang', lang);
 }
 
@@ -164,6 +221,124 @@ function setupTogglePanel(checkboxId, panelId) {
 }
 setupTogglePanel('toggleScreamers', 'panelScreamers');
 setupTogglePanel('toggleChatVote', 'panelChatVote');
+
+const toggleScreamersEl = document.getElementById('toggleScreamers');
+const intervalMinEl = document.getElementById('intervalMin');
+const intervalMaxEl = document.getElementById('intervalMax');
+const toggleChatVoteEl = document.getElementById('toggleChatVote');
+const voteSecondsEl = document.getElementById('voteSeconds');
+const widgetLinkRow = document.getElementById('widgetLinkRow');
+const widgetLinkInput = document.getElementById('widgetLinkInput');
+const copyWidgetLinkBtn = document.getElementById('copyWidgetLinkBtn');
+
+function readIntervalRange() {
+  let min = parseInt(intervalMinEl.value, 10);
+  let max = parseInt(intervalMaxEl.value, 10);
+  if (!Number.isFinite(min) || min < 1) min = 1;
+  if (!Number.isFinite(max) || max < 1) max = 1;
+  if (max < min) max = min;
+  intervalMinEl.value = min;
+  intervalMaxEl.value = max;
+  return { min, max };
+}
+
+function readVoteSeconds() {
+  let seconds = parseInt(voteSecondsEl.value, 10);
+  if (!Number.isFinite(seconds) || seconds < 5) seconds = 5;
+  voteSecondsEl.value = seconds;
+  return seconds;
+}
+
+async function ensureWidgetLink() {
+  try {
+    const port = await invoke('ensure_widget_server');
+    widgetLinkInput.value = `http://127.0.0.1:${port}/?lang=${currentLang}`;
+    widgetLinkRow.classList.add('visible');
+  } catch (e) {
+    console.error('Failed to start the widget server:', e);
+  }
+}
+
+copyWidgetLinkBtn.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(widgetLinkInput.value);
+    copyWidgetLinkBtn.classList.add('copied');
+    setTimeout(() => copyWidgetLinkBtn.classList.remove('copied'), 1200);
+  } catch (e) {
+    console.error('Clipboard write failed:', e);
+  }
+});
+
+async function syncAutoScares() {
+  if (!toggleScreamersEl.checked) {
+    try {
+      await invoke('stop_random_scares');
+    } catch (e) {
+      console.error('Failed to stop auto scares:', e);
+    }
+    return;
+  }
+
+  const { min, max } = readIntervalRange();
+  const chatVote = toggleChatVoteEl.checked;
+  const voteSeconds = readVoteSeconds();
+  try {
+    await invoke('start_random_scares', {
+      minMinutes: min,
+      maxMinutes: max,
+      chatVote,
+      voteSeconds,
+    });
+  } catch (e) {
+    console.error('Failed to start auto scares:', e);
+  }
+}
+
+toggleScreamersEl.addEventListener('change', syncAutoScares);
+intervalMinEl.addEventListener('change', syncAutoScares);
+intervalMaxEl.addEventListener('change', syncAutoScares);
+voteSecondsEl.addEventListener('change', syncAutoScares);
+
+toggleChatVoteEl.addEventListener('change', () => {
+  syncAutoScares();
+  if (toggleChatVoteEl.checked) {
+    ensureWidgetLink();
+  }
+});
+
+const masterVolumeEl = document.getElementById('masterVolume');
+const volumeValueEl = document.getElementById('volumeValue');
+
+function paintVolumeSlider(percent) {
+  volumeValueEl.textContent = `${percent}%`;
+  masterVolumeEl.style.background =
+    `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${percent}%, #2a2a2a ${percent}%, #2a2a2a 100%)`;
+}
+
+async function commitMasterVolume() {
+  const percent = parseInt(masterVolumeEl.value, 10);
+  localStorage.setItem('sos_volume', percent);
+  try {
+    await invoke('set_master_volume', { volume: percent / 100 });
+  } catch (e) {
+    console.error('Failed to set master volume:', e);
+  }
+}
+
+masterVolumeEl.addEventListener('input', () => paintVolumeSlider(parseInt(masterVolumeEl.value, 10)));
+masterVolumeEl.addEventListener('change', commitMasterVolume);
+
+async function initMasterVolume() {
+  const saved = parseInt(localStorage.getItem('sos_volume'), 10);
+  const percent = Number.isFinite(saved) ? Math.min(100, Math.max(0, saved)) : 100;
+  masterVolumeEl.value = percent;
+  paintVolumeSlider(percent);
+  try {
+    await invoke('set_master_volume', { volume: percent / 100 });
+  } catch (e) {
+    console.error('Failed to init master volume:', e);
+  }
+}
 
 const screamerListEl = document.getElementById('screamerList');
 const addScreamerBtn = document.getElementById('addScreamerBtn');
@@ -441,6 +616,8 @@ langSelect.addEventListener('change', () => {
 });
 
 const connectionState = { twitch: false, tiktok: false };
+let twitchChannel = '';
+let tiktokUsername = '';
 
 function refreshConnectionTexts() {
   const dict = translations[currentLang];
@@ -451,24 +628,185 @@ function refreshConnectionTexts() {
 
   twitchBtn.textContent = connectionState.twitch ? dict.settings_disconnect : dict.settings_connect;
   twitchBtn.classList.toggle('connected', connectionState.twitch);
-  twitchStatus.textContent = connectionState.twitch ? dict.settings_connected : dict.settings_not_connected;
+  twitchStatus.textContent = connectionState.twitch
+    ? `${dict.settings_connected}${twitchChannel ? ': ' + twitchChannel : ''}`
+    : dict.settings_not_connected;
   twitchStatus.classList.toggle('connected', connectionState.twitch);
 
   tiktokBtn.textContent = connectionState.tiktok ? dict.settings_disconnect : dict.settings_connect;
   tiktokBtn.classList.toggle('connected', connectionState.tiktok);
-  tiktokStatus.textContent = connectionState.tiktok ? dict.settings_connected : dict.settings_not_connected;
+  tiktokStatus.textContent = connectionState.tiktok
+    ? `${dict.settings_connected}${tiktokUsername ? ': ' + tiktokUsername : ''}`
+    : dict.settings_not_connected;
   tiktokStatus.classList.toggle('connected', connectionState.tiktok);
 }
 
-function setupConnectButton(platform, btnId) {
-  const btn = document.getElementById(btnId);
-  btn.addEventListener('click', () => {
-    connectionState[platform] = !connectionState[platform];
+document.getElementById('twitchBtn').addEventListener('click', async () => {
+  if (connectionState.twitch) {
+    try {
+      await invoke('disconnect_twitch_chat');
+    } catch (e) {
+      console.error('Failed to disconnect Twitch chat:', e);
+    }
+    connectionState.twitch = false;
+    twitchChannel = '';
     refreshConnectionTexts();
-  });
+    return;
+  }
+
+  openConnectModal('twitch');
+});
+
+document.getElementById('tiktokBtn').addEventListener('click', async () => {
+  if (connectionState.tiktok) {
+    try {
+      await invoke('disconnect_tiktok_chat');
+    } catch (e) {
+      console.error('Failed to disconnect TikTok chat:', e);
+    }
+    connectionState.tiktok = false;
+    tiktokUsername = '';
+    refreshConnectionTexts();
+    return;
+  }
+
+  openConnectModal('tiktok');
+});
+
+// --- Connect modal (Twitch / TikTok) ---------------------------------------
+// Replaces window.prompt(), which is a native OS dialog that isn't confined
+// to (and can be clipped by) the app's own window bounds.
+
+const connectModal = document.getElementById('connectModal');
+const connectModalClose = document.getElementById('connectModalClose');
+const connectModalIcon = document.getElementById('connectModalIcon');
+const connectModalTitle = document.getElementById('connectModalTitle');
+const connectModalSubtitle = document.getElementById('connectModalSubtitle');
+const connectModalField2 = document.getElementById('connectModalField2');
+const connectModalLabel1 = document.getElementById('connectModalLabel1');
+const connectModalLabel2 = document.getElementById('connectModalLabel2');
+const connectModalInput1 = document.getElementById('connectModalInput1');
+const connectModalInput2 = document.getElementById('connectModalInput2');
+const connectModalHint = document.getElementById('connectModalHint');
+const connectModalError = document.getElementById('connectModalError');
+const connectModalConfirm = document.getElementById('connectModalConfirm');
+
+let activeConnectPlatform = null;
+
+function openConnectModal(platform) {
+  const dict = translations[currentLang];
+  activeConnectPlatform = platform;
+
+  connectModalInput1.value = '';
+  connectModalInput2.value = '';
+  connectModalError.classList.add('hidden');
+  connectModalError.textContent = '';
+  connectModalConfirm.disabled = false;
+  connectModalConfirm.textContent = dict.connect_modal_confirm;
+
+  if (platform === 'twitch') {
+    connectModalIcon.textContent = 'TW';
+    connectModalIcon.style.background = '#9146FF';
+    connectModalTitle.textContent = dict.connect_twitch_title;
+    connectModalSubtitle.textContent = dict.connect_twitch_subtitle;
+    connectModalLabel1.textContent = dict.connect_twitch_label;
+    connectModalInput1.placeholder = dict.connect_twitch_placeholder;
+    connectModalField2.classList.add('hidden');
+    connectModalHint.classList.add('hidden');
+  } else {
+    connectModalIcon.textContent = 'TT';
+    connectModalIcon.style.background = '#000000';
+    connectModalTitle.textContent = dict.connect_tiktok_title;
+    connectModalSubtitle.textContent = dict.connect_tiktok_subtitle;
+    connectModalLabel1.textContent = dict.connect_tiktok_label_username;
+    connectModalInput1.placeholder = dict.connect_tiktok_placeholder_username;
+    connectModalLabel2.textContent = dict.connect_tiktok_label_apikey;
+    connectModalInput2.placeholder = dict.connect_tiktok_placeholder_apikey;
+    connectModalField2.classList.remove('hidden');
+    connectModalHint.innerHTML = dict.connect_tiktok_hint;
+    connectModalHint.classList.remove('hidden');
+  }
+
+  connectModal.classList.add('visible');
+  connectModalInput1.focus();
 }
-setupConnectButton('twitch', 'twitchBtn');
-setupConnectButton('tiktok', 'tiktokBtn');
+
+function closeConnectModal() {
+  connectModal.classList.remove('visible');
+  activeConnectPlatform = null;
+}
+
+async function submitConnectModal() {
+  const dict = translations[currentLang];
+
+  if (activeConnectPlatform === 'twitch') {
+    const channel = connectModalInput1.value.trim().replace(/^[#@]+/, '');
+    if (!channel) {
+      connectModalInput1.focus();
+      return;
+    }
+
+    connectModalConfirm.disabled = true;
+    connectModalConfirm.textContent = dict.connect_modal_connecting;
+    connectModalError.classList.add('hidden');
+
+    try {
+      await invoke('connect_twitch_chat', { channel });
+      connectionState.twitch = true;
+      twitchChannel = channel;
+      refreshConnectionTexts();
+      closeConnectModal();
+      return;
+    } catch (e) {
+      console.error('Failed to connect to Twitch chat:', e);
+      connectModalError.textContent = dict.twitch_connect_error;
+      connectModalError.classList.remove('hidden');
+    }
+  } else if (activeConnectPlatform === 'tiktok') {
+    const username = connectModalInput1.value.trim();
+    const apiKey = connectModalInput2.value.trim();
+    if (!username) {
+      connectModalInput1.focus();
+      return;
+    }
+    if (!apiKey) {
+      connectModalInput2.focus();
+      return;
+    }
+
+    connectModalConfirm.disabled = true;
+    connectModalConfirm.textContent = dict.connect_modal_connecting;
+    connectModalError.classList.add('hidden');
+
+    try {
+      await invoke('connect_tiktok_chat', { username, apiKey });
+      connectionState.tiktok = true;
+      tiktokUsername = username.replace(/^@/, '');
+      refreshConnectionTexts();
+      closeConnectModal();
+      return;
+    } catch (e) {
+      console.error('Failed to connect to TikTok chat:', e);
+      connectModalError.textContent = dict.tiktok_connect_error;
+      connectModalError.classList.remove('hidden');
+    }
+  }
+
+  connectModalConfirm.disabled = false;
+  connectModalConfirm.textContent = dict.connect_modal_confirm;
+}
+
+connectModalConfirm.addEventListener('click', submitConnectModal);
+connectModalClose.addEventListener('click', closeConnectModal);
+connectModal.addEventListener('click', (e) => {
+  if (e.target === connectModal) closeConnectModal();
+});
+[connectModalInput1, connectModalInput2].forEach((input) => {
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitConnectModal();
+    if (e.key === 'Escape') closeConnectModal();
+  });
+});
 
 const langModal = document.getElementById('langModal');
 
@@ -489,5 +827,15 @@ document.querySelectorAll('.lang-option').forEach((btn) => {
   });
 });
 
+document.querySelectorAll('.donate-card').forEach((link) => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const url = link.getAttribute('href');
+    if (!url) return;
+    openUrl(url).catch((err) => console.error('Failed to open donation link:', err));
+  });
+});
+
 initLanguage();
 loadScreamers();
+initMasterVolume();

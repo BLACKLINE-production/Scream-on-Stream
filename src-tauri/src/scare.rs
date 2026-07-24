@@ -1,12 +1,16 @@
-use crate::media::media_root;
+use crate::media::{self, media_root};
+use crate::vote;
+use rand::Rng;
 use serde::Serialize;
 use std::sync::Mutex;
+use std::time::Duration;
 use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, WebviewUrl, WebviewWindowBuilder};
 
 #[derive(Serialize, Clone)]
 pub struct ScareMedia {
     pub path: String,
-    pub kind: String, 
+    pub kind: String,
+    pub volume: f32,
 }
 
 pub struct PendingScare(pub Mutex<Option<ScareMedia>>);
@@ -17,24 +21,48 @@ impl Default for PendingScare {
     }
 }
 
+/// Master volume applied to every screamer (0.0 - 1.0).
+pub struct MasterVolume(pub Mutex<f32>);
+
+impl Default for MasterVolume {
+    fn default() -> Self {
+        MasterVolume(Mutex::new(1.0))
+    }
+}
+
 #[tauri::command]
-pub fn trigger_scare(
-    app: AppHandle,
-    state: tauri::State<PendingScare>,
-    id: String,
-) -> Result<(), String> {
-    let root = media_root(&app)?;
-    let path = root.join(&id);
+pub fn set_master_volume(state: tauri::State<MasterVolume>, volume: f32) -> Result<(), String> {
+    let mut guard = state.0.lock().map_err(|e| e.to_string())?;
+    *guard = volume.clamp(0.0, 1.0);
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_master_volume(state: tauri::State<MasterVolume>) -> Result<f32, String> {
+    let guard = state.0.lock().map_err(|e| e.to_string())?;
+    Ok(*guard)
+}
+
+async fn fire_scare(app: &AppHandle, id: &str) -> Result<(), String> {
+    let root = media_root(app)?;
+    let path = root.join(id);
     if !path.exists() {
         return Err("File not found".into());
     }
     let kind = if id.starts_with("Videos") { "video" } else { "audio" };
+    let volume = {
+        let vol_state = app.state::<MasterVolume>();
+        let guard = vol_state.0.lock().map_err(|e| e.to_string())?;
+        *guard
+    };
 
     {
+        let state = app.state::<PendingScare>();
         let mut guard = state.0.lock().map_err(|e| e.to_string())?;
         *guard = Some(ScareMedia {
             path: path.to_string_lossy().to_string(),
             kind: kind.to_string(),
+            volume,
         });
     }
 
@@ -42,7 +70,7 @@ pub fn trigger_scare(
         let _ = existing.close();
     }
 
-    let window = WebviewWindowBuilder::new(&app, "scare", WebviewUrl::App("overlay.html".into()))
+    let window = WebviewWindowBuilder::new(app, "scare", WebviewUrl::App("overlay.html".into()))
         .decorations(false)
         .always_on_top(true)
         .skip_taskbar(true)
@@ -67,6 +95,108 @@ pub fn trigger_scare(
     let _ = window.set_ignore_cursor_events(true);
     window.show().map_err(|e| e.to_string())?;
 
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn trigger_scare(app: AppHandle, id: String) -> Result<(), String> {
+    fire_scare(&app, &id).await
+}
+
+#[derive(Default)]
+pub struct AutoScareInner {
+    generation: u64,
+}
+
+#[derive(Default)]
+pub struct AutoScareState(Mutex<AutoScareInner>);
+
+#[tauri::command]
+pub async fn start_random_scares(
+    app: AppHandle,
+    state: tauri::State<'_, AutoScareState>,
+    min_minutes: u64,
+    max_minutes: u64,
+    chat_vote: bool,
+    vote_seconds: u64,
+) -> Result<(), String> {
+    if min_minutes == 0 || max_minutes == 0 || max_minutes < min_minutes {
+        return Err("Invalid interval range".into());
+    }
+
+    let generation = {
+        let mut inner = state.0.lock().map_err(|e| e.to_string())?;
+        inner.generation += 1;
+        inner.generation
+    };
+
+    let min_secs = min_minutes * 60;
+    let max_secs = max_minutes * 60;
+    let vote_secs = vote_seconds.max(5);
+
+    tauri::async_runtime::spawn(async move {
+        loop {
+            let mut winner_id: Option<String> = None;
+
+            if chat_vote {
+                let started = vote::start_vote_round(app.clone(), app.state::<vote::VoteState>());
+                match started {
+                    Ok(candidates) if !candidates.is_empty() => {
+                        tokio::time::sleep(Duration::from_secs(vote_secs)).await;
+
+                        if !is_current_generation(&app, generation) {
+                            let _ = vote::cancel_vote_round(app.state::<vote::VoteState>());
+                            return;
+                        }
+
+                        winner_id = vote::resolve_vote_round(app.state::<vote::VoteState>())
+                            .ok()
+                            .flatten();
+                    }
+                    _ => {
+
+                    }
+                }
+            }
+
+            let wait_secs = if max_secs > min_secs {
+                rand::thread_rng().gen_range(min_secs..=max_secs)
+            } else {
+                min_secs
+            };
+            tokio::time::sleep(Duration::from_secs(wait_secs)).await;
+
+            if !is_current_generation(&app, generation) {
+                return;
+            }
+
+            if let Some(id) = winner_id {
+                let _ = fire_scare(&app, &id).await;
+            } else if let Ok(list) = media::list_screamers(app.clone()) {
+                if !list.is_empty() {
+                    let idx = rand::thread_rng().gen_range(0..list.len());
+                    let id = list[idx].id.clone();
+                    let _ = fire_scare(&app, &id).await;
+                }
+            }
+        }
+    });
+
+    Ok(())
+}
+
+fn is_current_generation(app: &AppHandle, generation: u64) -> bool {
+    let auto_state = app.state::<AutoScareState>();
+    match auto_state.0.lock() {
+        Ok(guard) => guard.generation == generation,
+        Err(_) => false,
+    }
+}
+
+#[tauri::command]
+pub fn stop_random_scares(state: tauri::State<AutoScareState>) -> Result<(), String> {
+    let mut inner = state.0.lock().map_err(|e| e.to_string())?;
+    inner.generation += 1;
     Ok(())
 }
 

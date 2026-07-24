@@ -1,5 +1,8 @@
 mod media;
 mod scare;
+mod tiktok;
+mod twitch;
+mod vote;
 
 use tauri::{
     menu::{Menu, MenuItem},
@@ -11,7 +14,12 @@ use tauri::{
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .manage(scare::PendingScare::default())
+        .manage(scare::AutoScareState::default())
+        .manage(scare::MasterVolume::default())
+        .manage(vote::VoteState::default())
+        .manage(vote::WidgetServer::default())
         .invoke_handler(tauri::generate_handler![
             media::list_screamers,
             media::add_screamer_files,
@@ -20,6 +28,20 @@ pub fn run() {
             scare::trigger_scare,
             scare::take_scare_media,
             scare::force_close_scare,
+            scare::start_random_scares,
+            scare::stop_random_scares,
+            scare::set_master_volume,
+            scare::get_master_volume,
+            vote::start_vote_round,
+            vote::cast_vote,
+            vote::finish_vote_round,
+            vote::cancel_vote_round,
+            vote::get_vote_state,
+            vote::ensure_widget_server,
+            twitch::connect_twitch_chat,
+            twitch::disconnect_twitch_chat,
+            tiktok::connect_tiktok_chat,
+            tiktok::disconnect_tiktok_chat,
         ])
         .setup(|app| {
             let app_handle = app.handle().clone();

@@ -10,6 +10,7 @@
     "@tauri-apps/cli": "^2"
   },
   "dependencies": {
-    "@tauri-apps/plugin-dialog": "^2.7.2"
+    "@tauri-apps/plugin-dialog": "^2.7.2",
+    "piratetok-live-js": "^0.1.5"
   }
 }
