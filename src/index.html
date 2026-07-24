@@ -41,6 +41,7 @@
                   <input type="number" id="intervalMax" class="num-input" value="7" min="1" max="60">
                 </div>
                 <p class="hint" data-i18n="home_interval_hint">We recommend a 3-minute minimum so you have time to get into the game before it finds you.</p>
+                <p class="hint hint-warning" data-i18n="home_screamers_warning">⚠️ Use "Borderless Window" display mode in your game — otherwise the screamers may not work correctly.</p>
               </div>
             </div>
           </div>
@@ -65,14 +66,55 @@
                   <input type="number" id="voteSeconds" class="num-input" value="30" min="5" max="120">
                 </div>
 
-                <span class="field-label" data-i18n="home_obs_label">Connect the widget to OBS</span>
-                <ol class="obs-steps">
-                  <li data-i18n="home_obs_step1">Connect your account in the "Settings" section</li>
-                  <li data-i18n="home_obs_step2">Open OBS → Sources → click +</li>
-                  <li data-i18n="home_obs_step3">Select "Browser"</li>
-                  <li data-i18n="home_obs_step4">Paste the widget link below</li>
-                  <li data-i18n="home_obs_step5">Set size to 400×300 and place it in a corner</li>
-                </ol>
+                <p class="hint" data-i18n="home_widget_compat">Both guides work with the same widget — connect one or both, they run together with no conflict.</p>
+
+                <div class="accordion-group">
+                  <div class="accordion-item">
+                    <button class="accordion-header" type="button" id="obsAccordionBtn" aria-expanded="false" aria-controls="obsAccordionPanel">
+                      <span data-i18n="home_obs_label">Connect the widget to OBS</span>
+                      <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"/>
+                      </svg>
+                    </button>
+                    <div class="toggle-panel accordion-panel" id="obsAccordionPanel">
+                      <div class="toggle-panel-inner">
+                        <div class="toggle-panel-inner-content">
+                          <ol class="obs-steps">
+                            <li data-i18n="home_obs_step1">Connect your account in the "Settings" section</li>
+                            <li data-i18n="home_obs_step2">Open OBS → Sources → click +</li>
+                            <li data-i18n="home_obs_step3">Select "Browser"</li>
+                            <li data-i18n="home_obs_step4">Paste the link to the widget (located below)</li>
+                            <li data-i18n="home_obs_step5">Set size to 400×300 and place it in a corner</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="accordion-item">
+                    <button class="accordion-header" type="button" id="tiktokAccordionBtn" aria-expanded="false" aria-controls="tiktokAccordionPanel">
+                      <span data-i18n="home_tiktok_label">Connect the widget to TikTok Live Studio</span>
+                      <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"/>
+                      </svg>
+                    </button>
+                    <div class="toggle-panel accordion-panel" id="tiktokAccordionPanel">
+                      <div class="toggle-panel-inner">
+                        <div class="toggle-panel-inner-content">
+                          <ol class="obs-steps">
+                            <li data-i18n="home_tiktok_step1">Connect your account in the "Settings" section</li>
+                            <li data-i18n="home_tiktok_step2">Open TikTok Live Studio → top-left square → click "Add Source"</li>
+                            <li data-i18n="home_tiktok_step3">Select "Link" → Add</li>
+                            <li data-i18n="home_tiktok_step4">Paste the link to the widget (located below)</li>
+                            <li data-i18n="home_tiktok_step5">Set size to 400×300 and place it in a corner</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <span class="field-label" data-i18n="home_widget_link_label">Link to add the vote widget</span>
                 <div class="widget-link-row" id="widgetLinkRow">
                   <input type="text" class="widget-link-input" id="widgetLinkInput" readonly>
                   <button class="icon-btn-ghost copy-link-btn" id="copyWidgetLinkBtn" type="button" data-i18n-title="widget_link_copy" title="Copy link">
@@ -82,7 +124,7 @@
                     </svg>
                   </button>
                 </div>
-                <p class="hint hint-warning" data-i18n="home_obs_warning">⚠️ Please don't peek at OBS — let's keep the surprise, the fear and the fun intact!</p>
+                <p class="hint hint-warning" data-i18n="home_widget_warning">⚠️ Please don't peek at the widget while it's live — let's keep the surprise, the fear and the fun intact!</p>
               </div>
             </div>
           </div>
@@ -291,6 +333,15 @@
       <p class="hint connect-modal-error hidden" id="connectModalError"></p>
 
       <button class="connect-modal-confirm" id="connectModalConfirm" type="button"></button>
+    </div>
+  </div>
+
+  <div class="update-modal" id="updateModal">
+    <div class="update-modal-card">
+      <button class="add-modal-close" id="updateModalClose" type="button" aria-label="Close">&times;</button>
+      <span class="update-modal-title" data-i18n="update_modal_title">New version available?</span>
+      <p class="update-modal-text" id="updateModalText"></p>
+      <button class="update-modal-confirm" id="updateModalCheckBtn" type="button" data-i18n="update_modal_check_btn">Check for updates</button>
     </div>
   </div>
 

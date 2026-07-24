@@ -194,6 +194,51 @@ body {
 }
 .obs-steps li::marker { color: var(--accent-color); }
 
+.accordion-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.accordion-item {
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--card-bg-alt);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+.accordion-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: color 0.2s ease;
+}
+.accordion-header:hover { color: var(--accent-color); }
+html[lang="ru"] [data-i18n="home_tiktok_label"] { font-size: 0.72rem; }
+.accordion-header:focus-visible { box-shadow: inset 0 0 0 2px rgba(138, 43, 226, 0.6); }
+.accordion-chevron {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  transition: transform 0.3s ease, color 0.2s ease;
+}
+.accordion-header:hover .accordion-chevron { color: var(--accent-color); }
+.accordion-header.open .accordion-chevron { transform: rotate(180deg); color: var(--accent-color); }
+
+.accordion-panel .toggle-panel-inner-content {
+  padding: 2px 12px 12px;
+}
+
 .list-card {
   flex-shrink: 0;
   height: 318px;
@@ -812,3 +857,62 @@ body {
   font-family: inherit;
 }
 .copy-link-btn.copied { color: #4ade80; border-color: #4ade80; }
+
+.update-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 120;
+  animation: modalFade 0.25s ease;
+}
+.update-modal.visible { display: flex; }
+
+.update-modal-card {
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  width: calc(100% - 48px);
+  max-width: 320px;
+  padding: 30px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.update-modal-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-color);
+  text-shadow: var(--shadow);
+}
+
+.update-modal-text {
+  margin: 0 0 4px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.update-modal-confirm {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-radius: 9px;
+  background: var(--accent-gradient);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.update-modal-confirm:hover { transform: translateY(-1px); box-shadow: var(--shadow); }

@@ -32,15 +32,24 @@ const translations = {
     home_screamers_desc: 'Random jump scares during your stream',
     home_interval_label: 'Scare interval (minutes)',
     home_interval_hint: 'We recommend a 3-minute minimum so you have time to get into the game before it finds you.',
+    home_screamers_warning: '⚠️ Use "Borderless Window" display mode in your game — otherwise the screamers may not work correctly.',
     home_chatvote_title: 'Chat Vote',
     home_chatvote_desc: 'Let viewers vote for the next scare',
+    home_widget_compat: "Both guides work with the same widget — connect one or both, they run together with no conflict.",
     home_obs_label: 'Connect the widget to OBS',
     home_obs_step1: 'Connect your account in the "Settings" section',
     home_obs_step2: 'Open OBS → Sources → click +',
     home_obs_step3: 'Select "Browser"',
     home_obs_step4: 'Paste the link to the widget (located below)',
-    home_obs_step5: ' Set size to 400×300 and place it in a corner',
-    home_obs_warning: "⚠️ Please don't peek at OBS — let's keep the surprise, the fear and the fun intact!",
+    home_obs_step5: 'Set size to 400×300 and place it in a corner',
+    home_tiktok_label: 'Connect the widget to TikTok Live Studio',
+    home_tiktok_step1: 'Connect your account in the "Settings" section',
+    home_tiktok_step2: 'Open TikTok Live Studio → top-left square → click "Add Source"',
+    home_tiktok_step3: 'Select "Link" → Add',
+    home_tiktok_step4: 'Paste the link to the widget (located below)',
+    home_tiktok_step5: 'Set size to 400×300 and place it in a corner',
+    home_widget_link_label: 'Link to add the vote widget',
+    home_widget_warning: "⚠️ Please don't peek at the widget while it's live — let's keep the surprise, the fear and the fun intact!",
     home_list_title: 'Screamers',
     home_volume_label: 'Master Volume',
     home_volume_hint: 'Applies to every screamer — videos and sounds alike.',
@@ -97,6 +106,9 @@ const translations = {
     settings_panic_error_modifier: 'Pick at least one modifier key (Ctrl, Alt or Shift).',
     settings_panic_error_key: "That key isn't supported — try a letter, number, F-key, or Space.",
     settings_panic_error_taken: 'That combination is already used by another app on this system.',
+    update_modal_title: 'New version available?',
+    update_modal_text: (version) => `Hey! Thanks for using SoS for about a month now. There's a good chance a new version has come out with cool new features. We recommend checking whether an update is available. Your current version: ${version}`,
+    update_modal_check_btn: 'Check for updates',
   },
   ru: {
     tab_home: 'Главная',
@@ -106,15 +118,24 @@ const translations = {
     home_screamers_desc: 'Случайные скримеры во время стрима',
     home_interval_label: 'Интервал скримера (в минутах)',
     home_interval_hint: 'Рекомендуем минимум 3 минуты, чтобы успеть погрузиться в игру, прежде чем он тебя найдёт.',
+    home_screamers_warning: '⚠️ Используй режим отображения «Оконный без рамки» в игре — иначе скримеры могут срабатывать некорректно.',
     home_chatvote_title: 'Голосование чата',
     home_chatvote_desc: 'Пусть зрители голосуют за следующий скример',
+    home_widget_compat: 'Обе инструкции работают с одним и тем же виджетом — можно подключить одну или сразу обе, они не конфликтуют.',
     home_obs_label: 'Подключение виджета к OBS',
     home_obs_step1: 'Подключи аккаунт в разделе "Настройки"',
     home_obs_step2: 'Открой OBS → Источники → нажми +',
     home_obs_step3: 'Выбери «Браузер»',
     home_obs_step4: 'Вставь ссылку на виджет (находится ниже)',
     home_obs_step5: 'Задай размер 400×300 и размести в углу экрана',
-    home_obs_warning: '⚠️ Пожалуйста, не подглядывай в OBS — давай сохраним интригу, страх и веселье!',
+    home_tiktok_label: 'Подключение виджета к TikTok Live Studio',
+    home_tiktok_step1: 'Подключи аккаунт в разделе "Настройки"',
+    home_tiktok_step2: 'Открой TikTok Live Studio → левый верхний квадрат → нажми «Добавить источник»',
+    home_tiktok_step3: 'Выбери «Ссылка» → Добавить',
+    home_tiktok_step4: 'Вставь ссылку на виджет (находится ниже)',
+    home_tiktok_step5: 'Задай размер 400×300 и размести в углу экрана',
+    home_widget_link_label: 'Ссылка для добавления голосования',
+    home_widget_warning: '⚠️ Пожалуйста, не подглядывай в виджет, пока он в эфире — давай сохраним интригу, страх и веселье!',
     home_list_title: 'Скримеры',
     home_volume_label: 'Общая громкость',
     home_volume_hint: 'Действует на все скримеры — и на видео, и на звуки.',
@@ -171,6 +192,9 @@ const translations = {
     settings_panic_error_modifier: 'Выбери хотя бы один модификатор (Ctrl, Alt или Shift).',
     settings_panic_error_key: 'Эта клавиша не поддерживается — попробуй букву, цифру, F-клавишу или пробел.',
     settings_panic_error_taken: 'Эта комбинация уже занята другим приложением в системе.',
+    update_modal_title: 'Вышла новая версия?',
+    update_modal_text: (version) => `Привет, спасибо за использование SoS на протяжении уже месяца! Скорее всего, уже вышла новая версия этого приложения, в которой появились новые крутые функции. Рекомендуем проверить, не вышло ли обновление. Ваша текущая версия: ${version}`,
+    update_modal_check_btn: 'Проверить',
   },
 };
 
@@ -202,6 +226,7 @@ function applyLanguage(lang) {
   if (widgetLinkInput && widgetLinkInput.value) {
     widgetLinkInput.value = widgetLinkInput.value.replace(/lang=\w+/, `lang=${lang}`);
   }
+  refreshUpdateModalText();
   localStorage.setItem('sos_lang', lang);
 }
 
@@ -246,6 +271,19 @@ function setupTogglePanel(checkboxId, panelId) {
 setupTogglePanel('toggleScreamers', 'panelScreamers');
 setupTogglePanel('toggleChatVote', 'panelChatVote');
 
+function setupAccordion(headerId, panelId) {
+  const header = document.getElementById(headerId);
+  const panel = document.getElementById(panelId);
+  header.addEventListener('click', () => {
+    const isOpen = !panel.classList.contains('open');
+    panel.classList.toggle('open', isOpen);
+    header.classList.toggle('open', isOpen);
+    header.setAttribute('aria-expanded', String(isOpen));
+  });
+}
+setupAccordion('obsAccordionBtn', 'obsAccordionPanel');
+setupAccordion('tiktokAccordionBtn', 'tiktokAccordionPanel');
+
 const toggleScreamersEl = document.getElementById('toggleScreamers');
 const intervalMinEl = document.getElementById('intervalMin');
 const intervalMaxEl = document.getElementById('intervalMax');
@@ -276,7 +314,7 @@ function readVoteSeconds() {
 async function ensureWidgetLink() {
   try {
     const port = await invoke('ensure_widget_server');
-    widgetLinkInput.value = `http://127.0.0.1:${port}/?lang=${currentLang}`;
+    widgetLinkInput.value = `http://127.0.0.1.nip.io:${port}/?lang=${currentLang}`;
     widgetLinkRow.classList.add('visible');
   } catch (e) {
     console.error('Failed to start the widget server:', e);
@@ -856,6 +894,60 @@ document.querySelectorAll('.donate-card').forEach((link) => {
   });
 });
 
+const APP_VERSION = 'v0.1.2';
+const UPDATE_CHECK_URL = 'https://github.com/BLACKLINE-production/Scream-on-Stream';
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const UPDATE_NOTICE_INTERVAL_DAYS = 30;
+
+const updateModal = document.getElementById('updateModal');
+const updateModalText = document.getElementById('updateModalText');
+const updateModalClose = document.getElementById('updateModalClose');
+const updateModalCheckBtn = document.getElementById('updateModalCheckBtn');
+
+function refreshUpdateModalText() {
+  if (updateModalText) {
+    updateModalText.textContent = translations[currentLang].update_modal_text(APP_VERSION);
+  }
+}
+
+function showUpdateModal() {
+  refreshUpdateModalText();
+  updateModal.classList.add('visible');
+}
+
+function closeUpdateModal() {
+  updateModal.classList.remove('visible');
+}
+
+updateModalClose.addEventListener('click', closeUpdateModal);
+updateModal.addEventListener('click', (e) => {
+  if (e.target === updateModal) closeUpdateModal();
+});
+updateModalCheckBtn.addEventListener('click', () => {
+  openUrl(UPDATE_CHECK_URL).catch((err) => console.error('Failed to open update-check link:', err));
+  closeUpdateModal();
+});
+
+function initUpdateNotice() {
+  const now = Date.now();
+
+  let firstLaunch = parseInt(localStorage.getItem('sos_first_launch'), 10);
+  if (!firstLaunch) {
+    localStorage.setItem('sos_first_launch', String(now));
+    return;
+  }
+
+  const daysSinceInstall = (now - firstLaunch) / MS_PER_DAY;
+  if (daysSinceInstall < UPDATE_NOTICE_INTERVAL_DAYS) return;
+
+  const lastShown = parseInt(localStorage.getItem('sos_update_notice_last_shown'), 10) || 0;
+  const daysSinceLastShown = (now - lastShown) / MS_PER_DAY;
+  if (lastShown && daysSinceLastShown < UPDATE_NOTICE_INTERVAL_DAYS) return;
+
+  showUpdateModal();
+  localStorage.setItem('sos_update_notice_last_shown', String(now));
+}
+
 
 const PANIC_DEFAULT_PAYLOAD = { code: 'KeyP', ctrl: true, alt: true, shift: false, meta: false };
 
@@ -997,3 +1089,4 @@ loadScreamers();
 initMasterVolume();
 initPanicHotkey();
 initAutostart();
+initUpdateNotice();
