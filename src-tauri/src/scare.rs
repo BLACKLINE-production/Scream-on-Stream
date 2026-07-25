@@ -4,7 +4,7 @@ use rand::Rng;
 use serde::Serialize;
 use std::sync::Mutex;
 use std::time::Duration;
-use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 use tokio::sync::Notify;
 
 pub const PANIC_COOLDOWN_SECS: u64 = 5;
@@ -45,6 +45,40 @@ pub fn get_master_volume(state: tauri::State<MasterVolume>) -> Result<f32, Strin
     Ok(*guard)
 }
 
+/// Creates the permanent, transparent, click-through overlay window used
+/// for scares. Called once from `setup()` and left open for the whole
+/// lifetime of the app. Individual scares no longer create/destroy a
+/// window — they just push an event into this one. That means the window
+/// (and its OS-level handle/title) never changes, so OBS's Window Capture
+/// only has to be pointed at it once and will keep finding it after every
+/// scare, app restart, etc.
+pub fn spawn_overlay_window(app: &AppHandle) -> Result<(), String> {
+    if app.get_webview_window("scare").is_some() {
+        return Ok(());
+    }
+
+    let window = WebviewWindowBuilder::new(app, "scare", WebviewUrl::App("overlay.html".into()))
+        .title("SoS Scare Overlay")
+        .decorations(false)
+        .always_on_top(true)
+        .skip_taskbar(true)
+        .resizable(false)
+        .shadow(false)
+        .transparent(true)
+        .focused(false)
+        .visible(true)
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    if let Ok(Some(monitor)) = window.primary_monitor() {
+        let _ = window.set_size(*monitor.size());
+        let _ = window.set_position(*monitor.position());
+    }
+
+    let _ = window.set_ignore_cursor_events(true);
+    Ok(())
+}
+
 async fn fire_scare(app: &AppHandle, id: &str) -> Result<(), String> {
     let root = media_root(app)?;
     let path = root.join(id);
@@ -58,44 +92,26 @@ async fn fire_scare(app: &AppHandle, id: &str) -> Result<(), String> {
         *guard
     };
 
+    let media = ScareMedia {
+        path: path.to_string_lossy().to_string(),
+        kind: kind.to_string(),
+        volume,
+    };
+
+    // Kept as a fallback the overlay pulls once on load, in case a scare
+    // fires in the brief window before overlay.js has attached its event
+    // listener (e.g. right at app startup).
     {
         let state = app.state::<PendingScare>();
         let mut guard = state.0.lock().map_err(|e| e.to_string())?;
-        *guard = Some(ScareMedia {
-            path: path.to_string_lossy().to_string(),
-            kind: kind.to_string(),
-            volume,
-        });
+        *guard = Some(media.clone());
     }
 
-    if let Some(existing) = app.get_webview_window("scare") {
-        let _ = existing.close();
-    }
-
-    let window = WebviewWindowBuilder::new(app, "scare", WebviewUrl::App("overlay.html".into()))
-        .decorations(false)
-        .always_on_top(true)
-        .skip_taskbar(true)
-        .resizable(false)
-        .shadow(false)
-        .transparent(true)
-        .focused(false)
-        .visible(false)
-        .build()
+    // Overlay window is persistent now, so just push the new media into it
+    // instead of building/tearing down a window each time.
+    spawn_overlay_window(app)?; // no-op if it already exists; self-heals if it was ever closed
+    app.emit_to("scare", "scare://play", &media)
         .map_err(|e| e.to_string())?;
-
-    if kind == "video" {
-        if let Ok(Some(monitor)) = window.primary_monitor() {
-            let _ = window.set_size(*monitor.size());
-            let _ = window.set_position(*monitor.position());
-        }
-    } else {
-        let _ = window.set_size(PhysicalSize::new(1u32, 1u32));
-        let _ = window.set_position(PhysicalPosition::new(-10i32, -10i32));
-    }
-
-    let _ = window.set_ignore_cursor_events(true);
-    window.show().map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -255,9 +271,14 @@ pub fn take_scare_media(state: tauri::State<PendingScare>) -> Result<Option<Scar
 
 #[tauri::command]
 pub fn force_close_scare(app: AppHandle) -> Result<(), String> {
-    if let Some(window) = app.get_webview_window("scare") {
-        window.close().map_err(|e| e.to_string())?;
+    {
+        let pending = app.state::<PendingScare>();
+        let mut guard = pending.0.lock().map_err(|e| e.to_string())?;
+        *guard = None;
     }
+    // Window stays open (OBS keeps it captured); we just tell it to clear
+    // whatever's currently playing.
+    let _ = app.emit_to("scare", "scare://stop", ());
     Ok(())
 }
 

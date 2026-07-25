@@ -79,6 +79,9 @@ pub fn run() {
             if let Err(e) = hotkey::register_default(&app_handle) {
                 eprintln!("Failed to register the panic button hotkey: {e}");
             }
+            if let Err(e) = scare::spawn_overlay_window(&app_handle) {
+                eprintln!("Failed to create scare overlay window: {e}");
+            }
 
             let show_i = MenuItem::with_id(app, "show", "Open", true, None::<&str>)?;
             let stop_scare_i = MenuItem::with_id(app, "stop_scare", "Force stop scare", true, None::<&str>)?;
@@ -98,9 +101,7 @@ pub fn run() {
                         }
                     }
                     "stop_scare" => {
-                        if let Some(window) = app.get_webview_window("scare") {
-                            let _ = window.close();
-                        }
+                        let _ = scare::force_close_scare(app.clone());
                     }
                     "quit" => {
                         app.exit(0);
