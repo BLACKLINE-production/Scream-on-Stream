@@ -81,20 +81,16 @@ const translations = {
     twitch_prompt_channel: 'Enter your Twitch channel name (no @):',
     twitch_connect_error: "Couldn't connect to that Twitch channel. Check the name and try again.",
     tiktok_prompt_username: 'Enter your TikTok username (no @):',
-    tiktok_prompt_apikey: 'Enter your TikTok API key (free key at tik.tools):',
-    tiktok_connect_error: "Couldn't connect. Check your username and API key (get a free one at tik.tools) and make sure you're LIVE.",
+    tiktok_connect_error: "Couldn't connect. Check your username and make sure you're LIVE.",
     tiktok_not_live_error: "This account isn't LIVE right now. Start your TikTok broadcast first, then connect.",
     connect_twitch_title: 'Connect Twitch',
     connect_twitch_subtitle: "We'll read your chat to count votes.",
     connect_twitch_label: 'Channel name',
     connect_twitch_placeholder: 'your channel',
     connect_tiktok_title: 'Connect TikTok',
-    connect_tiktok_subtitle: "We'll read your chat to count votes.",
+    connect_tiktok_subtitle: "We'll read your chat to count votes. No API key or sign-up needed — just your username.",
     connect_tiktok_label_username: 'TikTok username',
     connect_tiktok_placeholder_username: 'your username',
-    connect_tiktok_label_apikey: 'API key',
-    connect_tiktok_placeholder_apikey: 'Paste your API key',
-    connect_tiktok_hint: 'Get a free key at <a href="https://tik.tools/login" target="_blank" rel="noopener">tik.tools</a> — takes about 30 seconds.',
     connect_modal_confirm: 'Connect',
     connect_modal_connecting: 'Connecting…',
     settings_panic_title: 'Panic Button',
@@ -168,20 +164,16 @@ const translations = {
     twitch_prompt_channel: 'Введите название вашего Twitch-канала (без @):',
     twitch_connect_error: 'Не удалось подключиться к этому Twitch-каналу. Проверьте название и попробуйте снова.',
     tiktok_prompt_username: 'Введите ваш TikTok-юзернейм (без @):',
-    tiktok_prompt_apikey: 'Введите ваш TikTok API-ключ (бесплатный — на tik.tools):',
-    tiktok_connect_error: 'Не удалось подключиться. Проверьте юзернейм и API-ключ (бесплатный можно получить на tik.tools), и убедитесь, что у вас идёт LIVE.',
+    tiktok_connect_error: 'Не удалось подключиться. Проверьте юзернейм и убедитесь, что у вас идёт LIVE.',
     tiktok_not_live_error: 'У этого аккаунта сейчас нет прямого эфира. Сначала запустите трансляцию в TikTok, потом подключайтесь.',
     connect_twitch_title: 'Подключить Twitch',
     connect_twitch_subtitle: 'Мы будем читать чат, чтобы считать голоса.',
     connect_twitch_label: 'Название канала',
     connect_twitch_placeholder: 'your channel',
     connect_tiktok_title: 'Подключить TikTok',
-    connect_tiktok_subtitle: 'Мы будем читать чат, чтобы считать голоса.',
+    connect_tiktok_subtitle: 'Мы будем читать чат, чтобы считать голоса. Без API-ключа и регистрации — только юзернейм.',
     connect_tiktok_label_username: 'Юзернейм TikTok',
     connect_tiktok_placeholder_username: 'your username',
-    connect_tiktok_label_apikey: 'API-ключ',
-    connect_tiktok_placeholder_apikey: 'Вставьте ваш API-ключ',
-    connect_tiktok_hint: 'Бесплатный ключ можно получить на <a href="https://tik.tools/login" target="_blank" rel="noopener">tik.tools</a> — займёт секунд 30.',
     connect_modal_confirm: 'Подключить',
     connect_modal_connecting: 'Подключение…',
     settings_panic_title: 'Паник-кнопка',
@@ -780,11 +772,8 @@ function openConnectModal(platform) {
     connectModalSubtitle.textContent = dict.connect_tiktok_subtitle;
     connectModalLabel1.textContent = dict.connect_tiktok_label_username;
     connectModalInput1.placeholder = dict.connect_tiktok_placeholder_username;
-    connectModalLabel2.textContent = dict.connect_tiktok_label_apikey;
-    connectModalInput2.placeholder = dict.connect_tiktok_placeholder_apikey;
-    connectModalField2.classList.remove('hidden');
-    connectModalHint.innerHTML = dict.connect_tiktok_hint;
-    connectModalHint.classList.remove('hidden');
+    connectModalField2.classList.add('hidden');
+    connectModalHint.classList.add('hidden');
   }
 
   connectModal.classList.add('visible');
@@ -824,13 +813,8 @@ async function submitConnectModal() {
     }
   } else if (activeConnectPlatform === 'tiktok') {
     const username = connectModalInput1.value.trim();
-    const apiKey = connectModalInput2.value.trim();
     if (!username) {
       connectModalInput1.focus();
-      return;
-    }
-    if (!apiKey) {
-      connectModalInput2.focus();
       return;
     }
 
@@ -839,7 +823,7 @@ async function submitConnectModal() {
     connectModalError.classList.add('hidden');
 
     try {
-      await invoke('connect_tiktok_chat', { username, apiKey });
+      await invoke('connect_tiktok_chat', { username });
       connectionState.tiktok = true;
       tiktokUsername = username.replace(/^@/, '');
       refreshConnectionTexts();

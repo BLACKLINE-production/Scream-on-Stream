@@ -3,6 +3,7 @@ mod hotkey;
 mod media;
 mod scare;
 mod tiktok;
+mod ttwid;
 mod twitch;
 mod vote;
 
@@ -44,6 +45,7 @@ pub fn run() {
         .manage(vote::VoteState::default())
         .manage(vote::WidgetServer::default())
         .manage(hotkey::PanicHotkeyState::default())
+        .manage(ttwid::TtwidCache::default())
         .invoke_handler(tauri::generate_handler![
             media::list_screamers,
             media::add_screamer_files,

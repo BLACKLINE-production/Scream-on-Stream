@@ -56,8 +56,6 @@ function playMedia(media) {
 }
 
 async function start() {
-  // Fallback: catches a scare that fired in the brief window before this
-  // listener was attached (e.g. right at app startup).
   try {
     const pending = await invoke('take_scare_media');
     if (pending) playMedia(pending);

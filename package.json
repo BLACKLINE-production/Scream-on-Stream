@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tauri-apps/plugin-dialog": "^2.7.2",
+    "@tiktool/live": "^2.12.1",
     "piratetok-live-js": "^0.1.5"
   }
 }
