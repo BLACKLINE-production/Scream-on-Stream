@@ -45,13 +45,6 @@ pub fn get_master_volume(state: tauri::State<MasterVolume>) -> Result<f32, Strin
     Ok(*guard)
 }
 
-/// Creates the permanent, transparent, click-through overlay window used
-/// for scares. Called once from `setup()` and left open for the whole
-/// lifetime of the app. Individual scares no longer create/destroy a
-/// window — they just push an event into this one. That means the window
-/// (and its OS-level handle/title) never changes, so OBS's Window Capture
-/// only has to be pointed at it once and will keep finding it after every
-/// scare, app restart, etc.
 pub fn spawn_overlay_window(app: &AppHandle) -> Result<(), String> {
     if app.get_webview_window("scare").is_some() {
         return Ok(());
@@ -98,18 +91,12 @@ async fn fire_scare(app: &AppHandle, id: &str) -> Result<(), String> {
         volume,
     };
 
-    // Kept as a fallback the overlay pulls once on load, in case a scare
-    // fires in the brief window before overlay.js has attached its event
-    // listener (e.g. right at app startup).
     {
         let state = app.state::<PendingScare>();
         let mut guard = state.0.lock().map_err(|e| e.to_string())?;
         *guard = Some(media.clone());
     }
 
-    // Overlay window is persistent now, so just push the new media into it
-    // instead of building/tearing down a window each time.
-    spawn_overlay_window(app)?; // no-op if it already exists; self-heals if it was ever closed
     app.emit_to("scare", "scare://play", &media)
         .map_err(|e| e.to_string())?;
 
@@ -276,8 +263,6 @@ pub fn force_close_scare(app: AppHandle) -> Result<(), String> {
         let mut guard = pending.0.lock().map_err(|e| e.to_string())?;
         *guard = None;
     }
-    // Window stays open (OBS keeps it captured); we just tell it to clear
-    // whatever's currently playing.
     let _ = app.emit_to("scare", "scare://stop", ());
     Ok(())
 }
