@@ -1,6 +1,6 @@
 [package]
 name = "SoS"
-version = "0.1.2"
+version = "0.1.3"
 description = "The overlay that hunts you mid-stream — and turns every scare into a viral moment."
 authors = ["BLACKLINE productions"]
 edition = "2024"
