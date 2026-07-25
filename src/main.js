@@ -83,6 +83,7 @@ const translations = {
     tiktok_prompt_username: 'Enter your TikTok username (no @):',
     tiktok_prompt_apikey: 'Enter your TikTok API key (free key at tik.tools):',
     tiktok_connect_error: "Couldn't connect. Check your username and API key (get a free one at tik.tools) and make sure you're LIVE.",
+    tiktok_not_live_error: "This account isn't LIVE right now. Start your TikTok broadcast first, then connect.",
     connect_twitch_title: 'Connect Twitch',
     connect_twitch_subtitle: "We'll read your chat to count votes.",
     connect_twitch_label: 'Channel name',
@@ -169,6 +170,7 @@ const translations = {
     tiktok_prompt_username: 'Введите ваш TikTok-юзернейм (без @):',
     tiktok_prompt_apikey: 'Введите ваш TikTok API-ключ (бесплатный — на tik.tools):',
     tiktok_connect_error: 'Не удалось подключиться. Проверьте юзернейм и API-ключ (бесплатный можно получить на tik.tools), и убедитесь, что у вас идёт LIVE.',
+    tiktok_not_live_error: 'У этого аккаунта сейчас нет прямого эфира. Сначала запустите трансляцию в TikTok, потом подключайтесь.',
     connect_twitch_title: 'Подключить Twitch',
     connect_twitch_subtitle: 'Мы будем читать чат, чтобы считать голоса.',
     connect_twitch_label: 'Название канала',
@@ -845,7 +847,10 @@ async function submitConnectModal() {
       return;
     } catch (e) {
       console.error('Failed to connect to TikTok chat:', e);
-      connectModalError.textContent = dict.tiktok_connect_error;
+      const message = typeof e === 'string' ? e : (e && e.message) || '';
+      connectModalError.textContent = message.startsWith('not_live:')
+        ? dict.tiktok_not_live_error
+        : dict.tiktok_connect_error;
       connectModalError.classList.remove('hidden');
     }
   }

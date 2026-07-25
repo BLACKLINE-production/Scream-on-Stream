@@ -7,6 +7,8 @@ use tokio::net::TcpStream;
 
 static GENERATION: AtomicU64 = AtomicU64::new(0);
 
+const CONNECT_TIMEOUT_SECS: u64 = 10;
+
 #[tauri::command]
 pub async fn connect_twitch_chat(app: AppHandle, channel: String) -> Result<(), String> {
     let channel = channel.trim().trim_start_matches(|c: char| c == '#' || c == '@').to_lowercase();
@@ -14,9 +16,13 @@ pub async fn connect_twitch_chat(app: AppHandle, channel: String) -> Result<(), 
         return Err("Channel name is empty".into());
     }
 
-    let probe = TcpStream::connect("irc.chat.twitch.tv:6667")
-        .await
-        .map_err(|e| format!("Could not reach Twitch chat: {e}"))?;
+    let probe = tokio::time::timeout(
+        Duration::from_secs(CONNECT_TIMEOUT_SECS),
+        TcpStream::connect("irc.chat.twitch.tv:6667"),
+    )
+    .await
+    .map_err(|_| "Connection to Twitch chat timed out. Check your internet connection and try again.".to_string())?
+    .map_err(|e| format!("Could not reach Twitch chat: {e}"))?;
     drop(probe);
 
     let generation = GENERATION.fetch_add(1, Ordering::SeqCst) + 1;
@@ -46,9 +52,13 @@ pub fn disconnect_twitch_chat() -> Result<(), String> {
 }
 
 async fn run_session(app: &AppHandle, channel: &str, generation: u64) -> Result<(), String> {
-    let stream = TcpStream::connect("irc.chat.twitch.tv:6667")
-        .await
-        .map_err(|e| e.to_string())?;
+    let stream = tokio::time::timeout(
+        Duration::from_secs(CONNECT_TIMEOUT_SECS),
+        TcpStream::connect("irc.chat.twitch.tv:6667"),
+    )
+    .await
+    .map_err(|_| "Connection to Twitch chat timed out".to_string())?
+    .map_err(|e| e.to_string())?;
     let (reader, mut writer) = stream.into_split();
     let mut lines = BufReader::new(reader).lines();
 

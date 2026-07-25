@@ -8,6 +8,8 @@ use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream, Web
 
 static GENERATION: AtomicU64 = AtomicU64::new(0);
 
+const CONNECT_TIMEOUT_SECS: u64 = 15;
+
 type TikTokWs = WebSocketStream<MaybeTlsStream<tokio::net::TcpStream>>;
 
 #[derive(Deserialize)]
@@ -23,6 +25,42 @@ struct TikTokEventData {
     comment: String,
 }
 
+#[derive(Deserialize)]
+struct CheckAliveResponse {
+    #[serde(default)]
+    data: Vec<CheckAliveEntry>,
+}
+
+#[derive(Deserialize)]
+struct CheckAliveEntry {
+    #[serde(default)]
+    alive: bool,
+}
+
+async fn check_is_live(username: &str, api_key: &str) -> Result<bool, String> {
+    let url = format!(
+        "https://api.tik.tools/webcast/check_alive?apiKey={}&unique_id={}",
+        urlencoding::encode(api_key),
+        urlencoding::encode(username)
+    );
+
+    let response = tokio::time::timeout(Duration::from_secs(10), reqwest::get(&url))
+        .await
+        .map_err(|_| "Live-status check timed out".to_string())?
+        .map_err(|e| format!("Live-status check failed: {e}"))?;
+
+    if !response.status().is_success() {
+        return Err(format!("Live-status check returned HTTP {}", response.status()));
+    }
+
+    let parsed: CheckAliveResponse = response
+        .json()
+        .await
+        .map_err(|e| format!("Unexpected response from live-status check: {e}"))?;
+
+    Ok(parsed.data.first().is_some_and(|entry| entry.alive))
+}
+
 #[tauri::command]
 pub async fn connect_tiktok_chat(app: AppHandle, username: String, api_key: String) -> Result<(), String> {
     let username = username.trim().trim_start_matches('@').to_lowercase();
@@ -36,9 +74,26 @@ pub async fn connect_tiktok_chat(app: AppHandle, username: String, api_key: Stri
 
     let url = build_url(&username, &api_key);
 
-    let (ws_stream, _) = connect_async(&url)
-        .await
-        .map_err(|e| format!("Could not connect to TikTok LIVE: {e}"))?;
+    match check_is_live(&username, &api_key).await {
+        Ok(true) => {}
+        Ok(false) => {
+            return Err(format!(
+                "not_live:@{username} is not currently LIVE on TikTok. Start the broadcast, then connect."
+            ));
+        }
+        Err(_) => {
+        }
+    }
+
+    let (ws_stream, _) = tokio::time::timeout(
+        Duration::from_secs(CONNECT_TIMEOUT_SECS),
+        connect_async(&url),
+    )
+    .await
+    .map_err(|_| {
+        "Connection timed out. Check your internet connection, or that TikTok LIVE isn't blocked on your network, and try again.".to_string()
+    })?
+    .map_err(|e| format!("Could not connect to TikTok LIVE: {e}"))?;
 
     let generation = GENERATION.fetch_add(1, Ordering::SeqCst) + 1;
 
@@ -51,10 +106,20 @@ pub async fn connect_tiktok_chat(app: AppHandle, username: String, api_key: Stri
 
             let stream = match pending.take() {
                 Some(s) => s,
-                None => match connect_async(&url).await {
-                    Ok((s, _)) => s,
-                    Err(e) => {
+                None => match tokio::time::timeout(
+                    Duration::from_secs(CONNECT_TIMEOUT_SECS),
+                    connect_async(&url),
+                )
+                .await
+                {
+                    Ok(Ok((s, _))) => s,
+                    Ok(Err(e)) => {
                         eprintln!("TikTok LIVE reconnect failed: {e}");
+                        tokio::time::sleep(Duration::from_secs(5)).await;
+                        continue;
+                    }
+                    Err(_) => {
+                        eprintln!("TikTok LIVE reconnect timed out");
                         tokio::time::sleep(Duration::from_secs(5)).await;
                         continue;
                     }
