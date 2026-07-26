@@ -24,6 +24,90 @@ impl Default for PendingScare {
     }
 }
 
+/// One update for anyone polling the HTTP overlay widget (an OBS/TikTok
+/// Studio Browser Source, typically). This runs alongside the native
+/// `scare://play` / `scare://stop` window events below — it doesn't
+/// replace them, it's just a second delivery path that doesn't depend on
+/// window/desktop capture at all, so it can't hit the BitBlt-vs-DWM
+/// "black overlay" issue that some capture setups run into.
+#[derive(Serialize, Clone)]
+#[serde(tag = "type", rename_all = "lowercase")]
+pub enum ScareWidgetEvent {
+    Play {
+        url: String,
+        kind: String,
+        volume: f32,
+    },
+    Stop,
+}
+
+#[derive(Serialize, Clone)]
+pub struct ScareWidgetPayload {
+    pub seq: u64,
+    pub event: Option<ScareWidgetEvent>,
+}
+
+struct ScareWidgetInner {
+    seq: u64,
+    event: Option<ScareWidgetEvent>,
+}
+
+/// Cheaply cloneable (Arc-backed) so the plain `std::thread` running the
+/// widget HTTP server (see `vote::ensure_widget_server`) can hold its own
+/// handle without needing a `tauri::State` or `AppHandle`.
+#[derive(Clone)]
+pub struct ScareWidgetState(std::sync::Arc<Mutex<ScareWidgetInner>>);
+
+impl Default for ScareWidgetState {
+    fn default() -> Self {
+        ScareWidgetState(std::sync::Arc::new(Mutex::new(ScareWidgetInner {
+            seq: 0,
+            event: None,
+        })))
+    }
+}
+
+impl ScareWidgetState {
+    fn push(&self, event: ScareWidgetEvent) {
+        if let Ok(mut inner) = self.0.lock() {
+            inner.seq += 1;
+            inner.event = Some(event);
+        }
+    }
+
+    pub fn snapshot(&self) -> ScareWidgetPayload {
+        match self.0.lock() {
+            Ok(inner) => ScareWidgetPayload {
+                seq: inner.seq,
+                event: inner.event.clone(),
+            },
+            Err(_) => ScareWidgetPayload { seq: 0, event: None },
+        }
+    }
+}
+
+/// Builds the `/media/...` URL the widget page will fetch the file from.
+/// `id` looks like `"Videos/foo.mp4"` or `"Sounds/bar.mp3"` (see media.rs).
+fn media_widget_url(id: &str) -> String {
+    let mut parts = id.splitn(2, '/');
+    let folder = parts.next().unwrap_or("");
+    let filename = parts.next().unwrap_or("");
+    format!("/media/{folder}/{}", percent_encode(filename))
+}
+
+fn percent_encode(input: &str) -> String {
+    let mut out = String::with_capacity(input.len());
+    for byte in input.as_bytes() {
+        match *byte {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                out.push(*byte as char);
+            }
+            _ => out.push_str(&format!("%{byte:02X}")),
+        }
+    }
+    out
+}
+
 pub struct MasterVolume(pub Mutex<f32>);
 
 impl Default for MasterVolume {
@@ -99,6 +183,15 @@ async fn fire_scare(app: &AppHandle, id: &str) -> Result<(), String> {
 
     app.emit_to("scare", "scare://play", &media)
         .map_err(|e| e.to_string())?;
+
+    // Second delivery path: whoever's polling the HTTP overlay widget
+    // (e.g. a Browser Source in OBS/TikTok Studio) gets the same scare,
+    // independent of whether the native window above got captured.
+    app.state::<ScareWidgetState>().push(ScareWidgetEvent::Play {
+        url: media_widget_url(id),
+        kind: kind.to_string(),
+        volume,
+    });
 
     Ok(())
 }
@@ -264,6 +357,9 @@ pub fn force_close_scare(app: AppHandle) -> Result<(), String> {
         *guard = None;
     }
     let _ = app.emit_to("scare", "scare://stop", ());
+
+    app.state::<ScareWidgetState>().push(ScareWidgetEvent::Stop);
+
     Ok(())
 }
 

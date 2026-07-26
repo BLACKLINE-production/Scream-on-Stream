@@ -1,5 +1,6 @@
 use crate::media;
 use crate::scare;
+use crate::scare::ScareWidgetState;
 use rand::seq::SliceRandom;
 use serde::Serialize;
 use std::sync::{Arc, Mutex};
@@ -144,11 +145,14 @@ impl Default for WidgetServer {
 }
 
 const WIDGET_HTML: &str = include_str!("../widget/vote.html");
+const SCARE_WIDGET_HTML: &str = include_str!("../widget/scare.html");
 const WIDGET_PORT_RANGE: std::ops::Range<u16> = 47100..47120;
 
 #[tauri::command]
 pub fn ensure_widget_server(
+    app: AppHandle,
     vote_state: tauri::State<VoteState>,
+    scare_state: tauri::State<ScareWidgetState>,
     server: tauri::State<WidgetServer>,
 ) -> Result<u16, String> {
     {
@@ -169,37 +173,29 @@ pub fn ensure_widget_server(
         bound.ok_or("Could not find a free local port for the widget server")?;
 
     let vote_state_bg = vote_state.0.clone();
+    let scare_state_bg: ScareWidgetState = (*scare_state).clone();
+    let app_bg = app.clone();
+
     std::thread::spawn(move || {
         for request in http_server.incoming_requests() {
-            let url = request.url().to_string();
-            let response_result = if url.starts_with("/api/vote-state") {
+            let raw_url = request.url().to_string();
+            let path = raw_url.split('?').next().unwrap_or("").to_string();
+
+            let response_result = if path == "/api/vote-state" {
                 let payload = {
                     let inner = vote_state_bg.lock().unwrap();
                     snapshot(&inner)
                 };
-                let body = serde_json::to_string(&payload).unwrap_or_else(|_| "{}".into());
-                let header_json =
-                    tiny_http::Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..])
-                        .unwrap();
-                let header_cors = tiny_http::Header::from_bytes(
-                    &b"Access-Control-Allow-Origin"[..],
-                    &b"*"[..],
-                )
-                .unwrap();
-                request.respond(
-                    tiny_http::Response::from_string(body)
-                        .with_header(header_json)
-                        .with_header(header_cors),
-                )
+                respond_json(request, &payload)
+            } else if path == "/api/scare-state" {
+                let payload = scare_state_bg.snapshot();
+                respond_json(request, &payload)
+            } else if let Some(rest) = path.strip_prefix("/media/") {
+                respond_media(request, &app_bg, rest)
+            } else if path == "/scare" {
+                respond_html(request, SCARE_WIDGET_HTML)
             } else {
-                let header_html = tiny_http::Header::from_bytes(
-                    &b"Content-Type"[..],
-                    &b"text/html; charset=utf-8"[..],
-                )
-                .unwrap();
-                request.respond(
-                    tiny_http::Response::from_string(WIDGET_HTML).with_header(header_html),
-                )
+                respond_html(request, WIDGET_HTML)
             };
             let _ = response_result;
         }
@@ -208,4 +204,76 @@ pub fn ensure_widget_server(
     let mut guard = server.port.lock().map_err(|e| e.to_string())?;
     *guard = Some(port);
     Ok(port)
+}
+
+fn cors_header() -> tiny_http::Header {
+    tiny_http::Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap()
+}
+
+fn respond_json<T: Serialize>(request: tiny_http::Request, payload: &T) -> std::io::Result<()> {
+    let body = serde_json::to_string(payload).unwrap_or_else(|_| "{}".into());
+    let header_json =
+        tiny_http::Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap();
+    request.respond(
+        tiny_http::Response::from_string(body)
+            .with_header(header_json)
+            .with_header(cors_header()),
+    )
+}
+
+fn respond_html(request: tiny_http::Request, html: &str) -> std::io::Result<()> {
+    let header_html =
+        tiny_http::Header::from_bytes(&b"Content-Type"[..], &b"text/html; charset=utf-8"[..])
+            .unwrap();
+    request.respond(
+        tiny_http::Response::from_string(html)
+            .with_header(header_html)
+            .with_header(cors_header()),
+    )
+}
+
+/// Serves `/media/<folder>/<filename>` (filename is percent-encoded by the
+/// Rust side when it builds the URL, so we decode it back here).
+fn respond_media(request: tiny_http::Request, app: &AppHandle, rest: &str) -> std::io::Result<()> {
+    let mut segments = rest.splitn(2, '/');
+    let folder = segments.next().unwrap_or("");
+    let filename = percent_decode(segments.next().unwrap_or(""));
+
+    match media::read_media_bytes(app, folder, &filename) {
+        Ok((bytes, mime)) => {
+            let header_type =
+                tiny_http::Header::from_bytes(&b"Content-Type"[..], mime.as_bytes()).unwrap();
+            let header_cache =
+                tiny_http::Header::from_bytes(&b"Cache-Control"[..], &b"no-store"[..]).unwrap();
+            request.respond(
+                tiny_http::Response::from_data(bytes)
+                    .with_header(header_type)
+                    .with_header(header_cache)
+                    .with_header(cors_header()),
+            )
+        }
+        Err(_) => {
+            request.respond(tiny_http::Response::from_string("Not found").with_status_code(404))
+        }
+    }
+}
+
+fn percent_decode(input: &str) -> String {
+    let bytes = input.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            if let Ok(hex) = std::str::from_utf8(&bytes[i + 1..i + 3]) {
+                if let Ok(value) = u8::from_str_radix(hex, 16) {
+                    out.push(value);
+                    i += 3;
+                    continue;
+                }
+            }
+        }
+        out.push(if bytes[i] == b'+' { b' ' } else { bytes[i] });
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
 }

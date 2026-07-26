@@ -191,3 +191,59 @@ pub fn delete_screamer(app: AppHandle, id: String) -> Result<(), String> {
     let path = media_root(&app)?.join(&id);
     fs::remove_file(path).map_err(|e| e.to_string())
 }
+
+fn mime_for_ext(ext: &str) -> &'static str {
+    match ext.to_lowercase().as_str() {
+        "mp4" => "video/mp4",
+        "webm" => "video/webm",
+        "mov" => "video/quicktime",
+        "mkv" => "video/x-matroska",
+        "avi" => "video/x-msvideo",
+        "mp3" => "audio/mpeg",
+        "wav" => "audio/wav",
+        "ogg" => "audio/ogg",
+        "flac" => "audio/flac",
+        "m4a" => "audio/mp4",
+        _ => "application/octet-stream",
+    }
+}
+
+/// Reads a screamer file's bytes for the widget HTTP server's `/media/<folder>/<filename>`
+/// route. `folder` must be exactly "Videos" or "Sounds", `filename` must be a
+/// bare file name with no path separators — this, plus the canonicalize/
+/// starts_with check below, keeps a crafted request from reading anything
+/// outside the app's own Media folder.
+pub fn read_media_bytes(
+    app: &AppHandle,
+    folder: &str,
+    filename: &str,
+) -> Result<(Vec<u8>, &'static str), String> {
+    if filename.is_empty()
+        || filename.contains('/')
+        || filename.contains('\\')
+        || filename == ".."
+        || filename == "."
+    {
+        return Err("Invalid file name".into());
+    }
+
+    let dir = match folder {
+        "Videos" => videos_dir(app)?,
+        "Sounds" => sounds_dir(app)?,
+        _ => return Err("Invalid folder".into()),
+    };
+
+    let candidate = dir.join(filename);
+    let canonical_dir = fs::canonicalize(&dir).map_err(|e| e.to_string())?;
+    let canonical_file = fs::canonicalize(&candidate).map_err(|_| "File not found".to_string())?;
+    if !canonical_file.starts_with(&canonical_dir) {
+        return Err("Invalid path".into());
+    }
+
+    let ext = canonical_file
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("");
+    let bytes = fs::read(&canonical_file).map_err(|e| e.to_string())?;
+    Ok((bytes, mime_for_ext(ext)))
+}

@@ -42,6 +42,67 @@
                 </div>
                 <p class="hint" data-i18n="home_interval_hint">We recommend a 3-minute minimum so you have time to get into the game before it finds you.</p>
                 <p class="hint hint-warning" data-i18n="home_screamers_warning">⚠️ Use "Borderless Window" display mode in your game — otherwise the screamers may not work correctly.</p>
+                <p class="hint" data-i18n="home_screamer_widget_bypass">Using the link below? You can skip the borderless-window tip above — Browser Sources don't need it.</p>
+
+                <p class="hint" data-i18n="home_screamer_widget_intro">You can also add screamers straight into OBS/TikTok Studio as a Browser Source — this avoids display-capture issues (like a black screen) some setups run into.</p>
+
+                <div class="accordion-group">
+                  <div class="accordion-item">
+                    <button class="accordion-header" type="button" id="screamerObsAccordionBtn" aria-expanded="false" aria-controls="screamerObsAccordionPanel">
+                      <span data-i18n="home_screamer_obs_label">Connect screamers to OBS</span>
+                      <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"/>
+                      </svg>
+                    </button>
+                    <div class="toggle-panel accordion-panel" id="screamerObsAccordionPanel">
+                      <div class="toggle-panel-inner">
+                        <div class="toggle-panel-inner-content">
+                          <ol class="obs-steps">
+                            <li data-i18n="home_screamer_obs_step1">Open OBS → Sources → click +</li>
+                            <li data-i18n="home_screamer_obs_step2">Select "Browser"</li>
+                            <li data-i18n="home_screamer_obs_step3">Paste the link to the overlay (located below)</li>
+                            <li data-i18n="home_screamer_obs_step4">Set Width/Height to match your canvas resolution (e.g. 1920×1080)</li>
+                            <li data-i18n="home_screamer_obs_step5">Drag it to the very top of your Sources list, above your game/webcam</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="accordion-item">
+                    <button class="accordion-header" type="button" id="screamerTiktokAccordionBtn" aria-expanded="false" aria-controls="screamerTiktokAccordionPanel">
+                      <span data-i18n="home_screamer_tiktok_label">Connect screamers to TikTok Live Studio</span>
+                      <svg class="accordion-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"/>
+                      </svg>
+                    </button>
+                    <div class="toggle-panel accordion-panel" id="screamerTiktokAccordionPanel">
+                      <div class="toggle-panel-inner">
+                        <div class="toggle-panel-inner-content">
+                          <ol class="obs-steps">
+                            <li data-i18n="home_screamer_tiktok_step1">Open TikTok Live Studio → top-left square → click "Add Source"</li>
+                            <li data-i18n="home_screamer_tiktok_step2">Select "Link" → Add</li>
+                            <li data-i18n="home_screamer_tiktok_step3">Paste the link to the overlay (located below)</li>
+                            <li data-i18n="home_screamer_tiktok_step4">Set Width/Height to match your canvas resolution (e.g. 1920×1080)</li>
+                            <li data-i18n="home_screamer_tiktok_step5">Drag it to the very top of your Sources list, above your game/webcam</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <span class="field-label" data-i18n="home_screamer_widget_link_label">Link to add the screamer overlay</span>
+                <div class="widget-link-row" id="screamerWidgetLinkRow">
+                  <input type="text" class="widget-link-input" id="screamerWidgetLinkInput" readonly>
+                  <button class="icon-btn-ghost copy-link-btn" id="copyScreamerWidgetLinkBtn" type="button" data-i18n-title="widget_link_copy" title="Copy link">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                  </button>
+                </div>
+                <p class="hint" data-i18n="home_screamer_widget_note">This runs alongside the regular full-screen popup — turn on whichever fits your setup, or both at once.</p>
               </div>
             </div>
           </div>

@@ -33,6 +33,22 @@ const translations = {
     home_interval_label: 'Scare interval (minutes)',
     home_interval_hint: 'We recommend a 3-minute minimum so you have time to get into the game before it finds you.',
     home_screamers_warning: '⚠️ Use "Borderless Window" display mode in your game — otherwise the screamers may not work correctly.',
+    home_screamer_widget_bypass: "Using the link below? You can skip the borderless-window tip above — Browser Sources don't need it.",
+    home_screamer_widget_intro: 'You can also add screamers straight into OBS/TikTok Studio as a Browser Source — this avoids display-capture issues (like a black screen) some setups run into.',
+    home_screamer_obs_label: 'Connect screamers to OBS',
+    home_screamer_obs_step1: 'Open OBS → Sources → click +',
+    home_screamer_obs_step2: 'Select "Browser"',
+    home_screamer_obs_step3: 'Paste the link to the overlay (located below)',
+    home_screamer_obs_step4: 'Set Width/Height to match your canvas resolution (e.g. 1920×1080)',
+    home_screamer_obs_step5: 'Drag it to the very top of your Sources list, above your game/webcam',
+    home_screamer_tiktok_label: 'Connect screamers to TikTok Live Studio',
+    home_screamer_tiktok_step1: 'Open TikTok Live Studio → top-left square → click "Add Source"',
+    home_screamer_tiktok_step2: 'Select "Link" → Add',
+    home_screamer_tiktok_step3: 'Paste the link to the overlay (located below)',
+    home_screamer_tiktok_step4: 'Set Width/Height to match your canvas resolution (e.g. 1920×1080)',
+    home_screamer_tiktok_step5: 'Drag it to the very top of your Sources list, above your game/webcam',
+    home_screamer_widget_link_label: 'Link to add the screamer overlay',
+    home_screamer_widget_note: 'This runs alongside the regular full-screen popup — turn on whichever fits your setup, or both at once.',
     home_chatvote_title: 'Chat Vote',
     home_chatvote_desc: 'Let viewers vote for the next scare',
     home_widget_compat: "Both guides work with the same widget — connect one or both, they run together with no conflict.",
@@ -116,6 +132,22 @@ const translations = {
     home_interval_label: 'Интервал скримера (в минутах)',
     home_interval_hint: 'Рекомендуем минимум 3 минуты, чтобы успеть погрузиться в игру, прежде чем он тебя найдёт.',
     home_screamers_warning: '⚠️ Используй режим отображения «Оконный без рамки» в игре — иначе скримеры могут срабатывать некорректно.',
+    home_screamer_widget_bypass: 'Используешь ссылку ниже? Совет про оконный режим выше можно пропустить — источнику «Браузер» он не нужен.',
+    home_screamer_widget_intro: 'Скримеры также можно добавить прямо в OBS/TikTok Studio как источник «Браузер» — это исключает проблемы с захватом экрана (вроде чёрного фона), с которыми сталкиваются некоторые стримеры.',
+    home_screamer_obs_label: 'Подключение скримеров к OBS',
+    home_screamer_obs_step1: 'Открой OBS → Источники → нажми +',
+    home_screamer_obs_step2: 'Выбери «Браузер»',
+    home_screamer_obs_step3: 'Вставь ссылку на оверлей (находится ниже)',
+    home_screamer_obs_step4: 'Задай Ширину/Высоту как у твоего холста (например, 1920×1080)',
+    home_screamer_obs_step5: 'Перетащи источник в самый верх списка — выше игры/вебкамеры',
+    home_screamer_tiktok_label: 'Подключение скримеров к TikTok Live Studio',
+    home_screamer_tiktok_step1: 'Открой TikTok Live Studio → левый верхний квадрат → нажми «Добавить источник»',
+    home_screamer_tiktok_step2: 'Выбери «Ссылка» → Добавить',
+    home_screamer_tiktok_step3: 'Вставь ссылку на оверлей (находится ниже)',
+    home_screamer_tiktok_step4: 'Задай Ширину/Высоту как у твоего холста (например, 1920×1080)',
+    home_screamer_tiktok_step5: 'Перетащи источник в самый верх списка — выше игры/вебкамеры',
+    home_screamer_widget_link_label: 'Ссылка для добавления оверлея скримеров',
+    home_screamer_widget_note: 'Работает параллельно с обычным полноэкранным попапом — включай то, что подходит именно тебе, или сразу оба варианта.',
     home_chatvote_title: 'Голосование чата',
     home_chatvote_desc: 'Пусть зрители голосуют за следующий скример',
     home_widget_compat: 'Обе инструкции работают с одним и тем же виджетом — можно подключить одну или сразу обе, они не конфликтуют.',
@@ -220,6 +252,9 @@ function applyLanguage(lang) {
   if (widgetLinkInput && widgetLinkInput.value) {
     widgetLinkInput.value = widgetLinkInput.value.replace(/lang=\w+/, `lang=${lang}`);
   }
+  if (screamerWidgetLinkInput && screamerWidgetLinkInput.value) {
+    screamerWidgetLinkInput.value = screamerWidgetLinkInput.value.replace(/lang=\w+/, `lang=${lang}`);
+  }
   refreshUpdateModalText();
   localStorage.setItem('sos_lang', lang);
 }
@@ -277,6 +312,8 @@ function setupAccordion(headerId, panelId) {
 }
 setupAccordion('obsAccordionBtn', 'obsAccordionPanel');
 setupAccordion('tiktokAccordionBtn', 'tiktokAccordionPanel');
+setupAccordion('screamerObsAccordionBtn', 'screamerObsAccordionPanel');
+setupAccordion('screamerTiktokAccordionBtn', 'screamerTiktokAccordionPanel');
 
 const toggleScreamersEl = document.getElementById('toggleScreamers');
 const intervalMinEl = document.getElementById('intervalMin');
@@ -286,6 +323,9 @@ const voteSecondsEl = document.getElementById('voteSeconds');
 const widgetLinkRow = document.getElementById('widgetLinkRow');
 const widgetLinkInput = document.getElementById('widgetLinkInput');
 const copyWidgetLinkBtn = document.getElementById('copyWidgetLinkBtn');
+const screamerWidgetLinkRow = document.getElementById('screamerWidgetLinkRow');
+const screamerWidgetLinkInput = document.getElementById('screamerWidgetLinkInput');
+const copyScreamerWidgetLinkBtn = document.getElementById('copyScreamerWidgetLinkBtn');
 
 function readIntervalRange() {
   let min = parseInt(intervalMinEl.value, 10);
@@ -325,6 +365,26 @@ copyWidgetLinkBtn.addEventListener('click', async () => {
   }
 });
 
+async function ensureScreamerWidgetLink() {
+  try {
+    const port = await invoke('ensure_widget_server');
+    screamerWidgetLinkInput.value = `http://127.0.0.1.nip.io:${port}/scare?lang=${currentLang}`;
+    screamerWidgetLinkRow.classList.add('visible');
+  } catch (e) {
+    console.error('Failed to start the widget server:', e);
+  }
+}
+
+copyScreamerWidgetLinkBtn.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(screamerWidgetLinkInput.value);
+    copyScreamerWidgetLinkBtn.classList.add('copied');
+    setTimeout(() => copyScreamerWidgetLinkBtn.classList.remove('copied'), 1200);
+  } catch (e) {
+    console.error('Clipboard write failed:', e);
+  }
+});
+
 async function syncAutoScares() {
   if (!toggleScreamersEl.checked) {
     try {
@@ -350,7 +410,12 @@ async function syncAutoScares() {
   }
 }
 
-toggleScreamersEl.addEventListener('change', syncAutoScares);
+toggleScreamersEl.addEventListener('change', () => {
+  syncAutoScares();
+  if (toggleScreamersEl.checked) {
+    ensureScreamerWidgetLink();
+  }
+});
 intervalMinEl.addEventListener('change', syncAutoScares);
 intervalMaxEl.addEventListener('change', syncAutoScares);
 voteSecondsEl.addEventListener('change', syncAutoScares);

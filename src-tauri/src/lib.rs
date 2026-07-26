@@ -42,6 +42,7 @@ pub fn run() {
         .manage(scare::PendingScare::default())
         .manage(scare::AutoScareState::default())
         .manage(scare::MasterVolume::default())
+        .manage(scare::ScareWidgetState::default())
         .manage(vote::VoteState::default())
         .manage(vote::WidgetServer::default())
         .manage(hotkey::PanicHotkeyState::default())
