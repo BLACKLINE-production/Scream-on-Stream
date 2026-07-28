@@ -7,7 +7,7 @@
 ### Be scared, scare your viewers. Keep the stream alive.
 ### Испугайся сам, испугай зрителей. Держи стрим живым.
 
-*Screamer on Stream is an app for streamers or those who like to get scared: random jumpscares right during the broadcast,*
+*Scream on Stream is an app for streamers or those who like to get scared: random jumpscares right during the broadcast,*
 *Chat voting for the next screamer and a widget for OBS in one click.*
 
 *Scream on Stream — приложение для стримеров и тех, кто любит пугаться: случайные скримеры прямо во время эфира,*
