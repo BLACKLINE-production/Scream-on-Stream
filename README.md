@@ -15,7 +15,7 @@
 
 [![License](https://img.shields.io/badge/License-read-8A2BE2?style=for-the-badge&labelColor=0a0a0a)](https://github.com/BLACKLINE-production/Scream-on-Stream?tab=License-1-ov-file)
 [![Website](https://img.shields.io/badge/Website-scream--on--stream.pages.dev-C71585?style=for-the-badge&labelColor=0a0a0a)](https://scream-on-stream.pages.dev/)
-[![Release](https://img.shields.io/badge/Release-v0.1.2-8A2BE2?style=for-the-badge&labelColor=0a0a0a)](https://github.com/BLACKLINE-production/Scream-on-Stream/releases/tag/v0.1.2-fixed)
+[![Release](https://img.shields.io/badge/Release-v0.1.3-8A2BE2?style=for-the-badge&labelColor=0a0a0a)](https://github.com/BLACKLINE-production/Scream-on-Stream/releases/tag/v0.1.3)
 
 </div>
 
@@ -158,7 +158,7 @@ Project website / Сайт проекта: **[scream-on-stream.pages.dev](https:
 
 ### Ready to scare yourself and your audience? / Готов испугать себя и свою аудиторию?
 
-[![DOWNLOAD](https://img.shields.io/badge/⬇%20DOWNLOAD%20v0.1.2-8A2BE2?style=for-the-badge&logoColor=white&labelColor=C71585)](https://github.com/BLACKLINE-production/Scream-on-Stream/releases/tag/v0.1.2-fixed)
+[![DOWNLOAD](https://img.shields.io/badge/⬇%20DOWNLOAD%20v0.1.3-8A2BE2?style=for-the-badge&logoColor=white&labelColor=C71585)](https://github.com/BLACKLINE-production/Scream-on-Stream/releases/tag/v0.1.3)
 
 <br>
 
