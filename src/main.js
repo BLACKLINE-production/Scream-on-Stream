@@ -2,6 +2,86 @@ const { invoke } = window.__TAURI__.core;
 const { open } = window.__TAURI__.dialog;
 const { getCurrentWebview } = window.__TAURI__.webview;
 const { openUrl } = window.__TAURI__.opener;
+const { getCurrentWindow } = window.__TAURI__.window;
+
+const appWindow = getCurrentWindow();
+appWindow.show().catch(() => {});
+
+(function playSplash() {
+  const splash = document.getElementById('splash');
+  const title = document.getElementById('splashTitle');
+  const bar = document.getElementById('splashBarFill');
+  const stage = document.getElementById('splashStage');
+  const curtainTop = document.getElementById('splashCurtainTop');
+  const curtainBottom = document.getElementById('splashCurtainBottom');
+
+  if (!splash || !title || !bar || !stage || !curtainTop || !curtainBottom) return;
+
+  const removeSplash = () => {
+    if (!splash.isConnected) return;
+    splash.classList.add('splash-fading');
+    setTimeout(() => splash.remove(), 240);
+  };
+
+  const failSafe = setTimeout(removeSplash, 4000);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const stageWidth = stage.clientWidth;
+      const titleWidth = title.offsetWidth;
+      const margin = (stageWidth - titleWidth) / 2;
+      const PAD = 15;
+      const startLeft = margin - PAD;
+      const endRight = stageWidth - margin + PAD;
+      const shortWidth = Math.max(endRight - startLeft, 8);
+
+      bar.style.left = startLeft + 'px';
+
+      const drawIn = bar.animate(
+        [
+          { left: startLeft + 'px', width: '0px' },
+          { left: startLeft + 'px', width: shortWidth + 'px' }
+        ],
+        { duration: 320, delay: 550, easing: 'cubic-bezier(0.65,0,0.35,1)', fill: 'forwards' }
+      );
+
+      const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      drawIn.finished
+        .then(() => wait(500))
+        .then(() =>
+          bar.animate(
+            [
+              { left: startLeft + 'px', width: shortWidth + 'px' },
+              { left: '0px', width: '100%' }
+            ],
+            { duration: 280, easing: 'cubic-bezier(0.65,0,0.35,1)', fill: 'forwards' }
+          ).finished
+        )
+        .then(() => wait(60))
+        .then(() => {
+          bar.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, fill: 'forwards' });
+          const topMove = curtainTop.animate(
+            [{ transform: 'translateY(0%)' }, { transform: 'translateY(-100%)' }],
+            { duration: 420, easing: 'cubic-bezier(0.76,0,0.24,1)', fill: 'forwards' }
+          );
+          curtainBottom.animate(
+            [{ transform: 'translateY(0%)' }, { transform: 'translateY(100%)' }],
+            { duration: 420, easing: 'cubic-bezier(0.76,0,0.24,1)', fill: 'forwards' }
+          );
+          return topMove.finished;
+        })
+        .then(() => {
+          clearTimeout(failSafe);
+          removeSplash();
+        })
+        .catch(() => {
+          clearTimeout(failSafe);
+          removeSplash();
+        });
+    });
+  });
+})();
 
 const VIDEO_EXTS = ['mp4', 'webm', 'mov', 'mkv', 'avi'];
 const AUDIO_EXTS = ['mp3', 'wav', 'ogg', 'flac', 'm4a'];

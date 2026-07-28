@@ -916,3 +916,103 @@ html[lang="ru"] [data-i18n="home_tiktok_label"] { font-size: 0.72rem; }
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .update-modal-confirm:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  overflow: hidden;
+  pointer-events: none;
+  background: #000;
+}
+
+.splash.splash-fading {
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.splash-rotate {
+  position: absolute;
+  top: -15vh;
+  left: -15vw;
+  width: 130vw;
+  height: 130vh;
+  transform: rotate(-3deg);
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+.splash-stage {
+  position: absolute;
+  top: 15vh;
+  left: 15vw;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
+.splash-curtain {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: #060606;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.splash-curtain-top {
+  top: 0;
+  justify-content: flex-end;
+  box-shadow: inset 0 -1px 0 rgba(138, 43, 226, 0.4);
+}
+
+.splash-curtain-bottom {
+  bottom: 0;
+  justify-content: flex-start;
+  box-shadow: inset 0 1px 0 rgba(138, 43, 226, 0.4);
+}
+
+.splash-title {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 1.85rem;
+  letter-spacing: 0.14em;
+  color: #ffffff;
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: splashFadeUp 0.6s ease 0.06s forwards;
+}
+
+.splash-sub {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 0.6rem;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-top: 13px;
+  opacity: 0;
+  transform: translateY(-4px);
+  animation: splashFadeUp 0.6s ease 0.18s forwards;
+}
+
+@keyframes splashFadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.splash-bar-fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 3px;
+  width: 0;
+  margin-top: -1.5px;
+  border-radius: 2px;
+  background: var(--accent-gradient);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+}

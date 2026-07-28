@@ -24,12 +24,6 @@ impl Default for PendingScare {
     }
 }
 
-/// One update for anyone polling the HTTP overlay widget (an OBS/TikTok
-/// Studio Browser Source, typically). This runs alongside the native
-/// `scare://play` / `scare://stop` window events below — it doesn't
-/// replace them, it's just a second delivery path that doesn't depend on
-/// window/desktop capture at all, so it can't hit the BitBlt-vs-DWM
-/// "black overlay" issue that some capture setups run into.
 #[derive(Serialize, Clone)]
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum ScareWidgetEvent {
@@ -52,9 +46,6 @@ struct ScareWidgetInner {
     event: Option<ScareWidgetEvent>,
 }
 
-/// Cheaply cloneable (Arc-backed) so the plain `std::thread` running the
-/// widget HTTP server (see `vote::ensure_widget_server`) can hold its own
-/// handle without needing a `tauri::State` or `AppHandle`.
 #[derive(Clone)]
 pub struct ScareWidgetState(std::sync::Arc<Mutex<ScareWidgetInner>>);
 
@@ -86,8 +77,6 @@ impl ScareWidgetState {
     }
 }
 
-/// Builds the `/media/...` URL the widget page will fetch the file from.
-/// `id` looks like `"Videos/foo.mp4"` or `"Sounds/bar.mp3"` (see media.rs).
 fn media_widget_url(id: &str) -> String {
     let mut parts = id.splitn(2, '/');
     let folder = parts.next().unwrap_or("");
@@ -184,9 +173,6 @@ async fn fire_scare(app: &AppHandle, id: &str) -> Result<(), String> {
     app.emit_to("scare", "scare://play", &media)
         .map_err(|e| e.to_string())?;
 
-    // Second delivery path: whoever's polling the HTTP overlay widget
-    // (e.g. a Browser Source in OBS/TikTok Studio) gets the same scare,
-    // independent of whether the native window above got captured.
     app.state::<ScareWidgetState>().push(ScareWidgetEvent::Play {
         url: media_widget_url(id),
         kind: kind.to_string(),

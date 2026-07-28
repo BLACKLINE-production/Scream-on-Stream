@@ -1,24 +1,3 @@
-//! Automatic `ttwid` capture.
-//!
-//! `piratetok-live-rs`'s own anonymous `ttwid` fetch goes through a plain
-//! HTTP client, which TikTok's Slardar WAF blocks (it returns a JS
-//! challenge page instead of a Set-Cookie). A real browser engine passes
-//! that challenge trivially because it actually executes the JS — and we
-//! already ship one: the OS webview that Tauri uses for every window.
-//!
-//! So instead of asking the user to open DevTools and copy a cookie by
-//! hand, we open a fully hidden webview pointed at tiktok.com, let it load
-//! for real, then read the `ttwid` cookie back out of the webview's own
-//! cookie store via `WebviewWindow::cookies_for_url` (this reads
-//! HttpOnly/Secure cookies too, unlike `document.cookie`). Works the same
-//! way on Windows and macOS since it's Tauri's own cross-platform API —
-//! no `webview2-com`/`WKHTTPCookieStore` plumbing needed.
-//!
-//! This is deliberately NOT trying to reverse-engineer or forge the
-//! ttwid/msToken generation algorithm the way some scraping tools do —
-//! that approach breaks every time TikTok tweaks the WAF. Driving a real
-//! browser engine is slower per-attempt but far more durable.
-
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use tauri::{AppHandle, Manager, Url, WebviewUrl, WebviewWindowBuilder};
@@ -26,15 +5,8 @@ use tauri::{AppHandle, Manager, Url, WebviewUrl, WebviewWindowBuilder};
 const CAPTURE_WINDOW_LABEL: &str = "tiktok-ttwid-capture";
 const TIKTOK_HOME: &str = "https://www.tiktok.com/";
 
-/// How long we let the hidden webview sit on tiktok.com before reading
-/// cookies back. The Slardar challenge is JS-driven and usually resolves
-/// within a second or two of the page loading; this is generous padding.
 const CHALLENGE_WAIT: Duration = Duration::from_secs(4);
 
-/// Once captured, reuse the cookie for this long before bothering to
-/// recapture — avoids popping the hidden webview open on every single
-/// reconnect. If TikTok rejects the cached value earlier than this,
-/// `tiktok.rs` should just call `capture_ttwid` again directly.
 const CACHE_TTL: Duration = Duration::from_secs(60 * 30);
 
 #[derive(Default)]
@@ -50,8 +22,6 @@ impl Default for TtwidCache {
     }
 }
 
-/// Returns a `ttwid` value, using the cached one if it's still fresh,
-/// otherwise capturing a new one via the hidden webview.
 pub async fn get_ttwid(app: &AppHandle) -> Result<String, String> {
     if let Some(cached) = read_cache(app) {
         return Ok(cached);
@@ -61,8 +31,6 @@ pub async fn get_ttwid(app: &AppHandle) -> Result<String, String> {
     Ok(fresh)
 }
 
-/// Forces a fresh capture, bypassing the cache. Call this if a connect
-/// attempt fails and you suspect the cached cookie is stale/invalid.
 pub async fn refresh_ttwid(app: &AppHandle) -> Result<String, String> {
     let fresh = capture_ttwid(app).await?;
     write_cache(app, &fresh);
@@ -89,7 +57,6 @@ fn write_cache(app: &AppHandle, value: &str) {
 }
 
 async fn capture_ttwid(app: &AppHandle) -> Result<String, String> {
-    // Clean up any leftover window from a previous (e.g. crashed/aborted) attempt.
     if let Some(existing) = app.get_webview_window(CAPTURE_WINDOW_LABEL) {
         let _ = existing.close();
     }
@@ -104,11 +71,6 @@ async fn capture_ttwid(app: &AppHandle) -> Result<String, String> {
         .build()
         .map_err(|e| format!("Could not open capture webview: {e}"))?;
 
-    // Let the page (and its JS challenge) actually run. `cookies_for_url`
-    // is a blocking call under the hood, so run it off the async task via
-    // spawn_blocking — this also sidesteps the documented Windows deadlock
-    // that can happen when reading cookies synchronously from certain
-    // contexts.
     tokio::time::sleep(CHALLENGE_WAIT).await;
 
     let window_for_read = window.clone();

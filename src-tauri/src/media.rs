@@ -208,11 +208,6 @@ fn mime_for_ext(ext: &str) -> &'static str {
     }
 }
 
-/// Reads a screamer file's bytes for the widget HTTP server's `/media/<folder>/<filename>`
-/// route. `folder` must be exactly "Videos" or "Sounds", `filename` must be a
-/// bare file name with no path separators — this, plus the canonicalize/
-/// starts_with check below, keeps a crafted request from reading anything
-/// outside the app's own Media folder.
 pub fn read_media_bytes(
     app: &AppHandle,
     folder: &str,

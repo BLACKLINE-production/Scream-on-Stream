@@ -2,10 +2,6 @@ use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut};
 
-/// Default panic-button combo. Chosen because it's free on Windows out of
-/// the box: it doesn't collide with Ctrl+Alt+Del, Win+P (display switch),
-/// Ctrl+Shift+Esc (Task Manager), or the shortcuts most capture/streaming
-/// software binds by default.
 const DEFAULT_CODE: Code = Code::KeyP;
 
 pub struct PanicHotkeyState(pub Mutex<Option<Shortcut>>);
@@ -16,9 +12,6 @@ impl Default for PanicHotkeyState {
     }
 }
 
-/// Registers the default Ctrl+Alt+P combo. Called once on startup; the
-/// frontend calls `set_panic_hotkey` right after with whatever the user
-/// last saved (which may just be this same default).
 pub fn register_default(app: &AppHandle) -> Result<(), String> {
     let shortcut = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), DEFAULT_CODE);
     app.global_shortcut()
@@ -30,13 +23,6 @@ pub fn register_default(app: &AppHandle) -> Result<(), String> {
     Ok(())
 }
 
-/// Re-registers the panic-button hotkey to a new combination. `code` is a
-/// JS `KeyboardEvent.code` string (e.g. "KeyP", "Digit1", "F5", "Space") —
-/// the frontend sends it verbatim so there's no ambiguity in translation.
-///
-/// Registers the new combo before dropping the old one, so a failed
-/// attempt (e.g. the combo is already claimed by another app) leaves the
-/// previous hotkey intact instead of leaving the user with nothing bound.
 #[tauri::command]
 pub fn set_panic_hotkey(
     app: AppHandle,

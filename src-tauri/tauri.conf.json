@@ -18,7 +18,9 @@
         "minimizable": true,
         "center": true,
         "decorations": true,
-        "shadow": true
+        "shadow": true,
+        "visible": false,
+        "backgroundColor": "#0a0a0a"
       }
     ],
     "security": {

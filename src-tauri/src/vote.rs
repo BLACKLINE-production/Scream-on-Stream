@@ -232,8 +232,6 @@ fn respond_html(request: tiny_http::Request, html: &str) -> std::io::Result<()> 
     )
 }
 
-/// Serves `/media/<folder>/<filename>` (filename is percent-encoded by the
-/// Rust side when it builds the URL, so we decode it back here).
 fn respond_media(request: tiny_http::Request, app: &AppHandle, rest: &str) -> std::io::Result<()> {
     let mut segments = rest.splitn(2, '/');
     let folder = segments.next().unwrap_or("");
