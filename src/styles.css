@@ -244,8 +244,16 @@ html[lang="ru"] [data-i18n="home_tiktok_label"] { font-size: 0.72rem; }
   height: 318px;
   display: flex;
   flex-direction: column;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.list-card.drag-over {
+  border-color: var(--accent-color);
+  background: rgba(138, 43, 226, 0.08);
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.35);
 }
 .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.list-header-left { display: flex; align-items: center; }
+.master-screamer-check { margin-right: 10px; }
 .list-title {
   font-family: 'Orbitron', sans-serif;
   font-size: 0.78rem;
@@ -297,9 +305,73 @@ html[lang="ru"] [data-i18n="home_tiktok_label"] { font-size: 0.72rem; }
 }
 .screamer-item:hover { background: var(--card-bg-alt); }
 
+.screamer-check {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px;
+  margin-right: 10px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.screamer-check input {
+  position: absolute; inset: 0;
+  opacity: 0; margin: 0; cursor: pointer;
+}
+.screamer-check-box {
+  width: 16px; height: 16px;
+  border-radius: 5px;
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-color);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.screamer-check-box::after {
+  content: '';
+  width: 4px; height: 8px;
+  margin-top: -1px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.15s ease;
+}
+.screamer-check input:checked + .screamer-check-box {
+  background: var(--accent-gradient);
+  border-color: transparent;
+}
+.screamer-check input:checked + .screamer-check-box::after {
+  transform: rotate(45deg) scale(1);
+}
+.screamer-check input:focus-visible + .screamer-check-box {
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.6);
+}
+.screamer-check:hover .screamer-check-box { border-color: var(--accent-color); }
+
+.screamer-check input:indeterminate + .screamer-check-box {
+  background: var(--accent-gradient);
+  border-color: transparent;
+}
+.screamer-check input:indeterminate + .screamer-check-box::after {
+  width: 8px; height: 0;
+  margin-top: 0;
+  border: none;
+  border-top: 2px solid #fff;
+  border-radius: 1px;
+  transform: scale(1) rotate(0deg);
+}
+.screamer-check input:disabled + .screamer-check-box {
+  opacity: 0.4;
+}
+.screamer-check:has(input:disabled) { cursor: default; }
+
+.screamer-item.screamer-disabled { opacity: 0.55; }
+.screamer-item.screamer-disabled .screamer-name { color: var(--text-secondary); }
+
 .screamer-name {
   font-size: 0.86rem; flex: 1; margin-right: 8px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.screamer-kind-emoji {
+  margin-right: 6px;
 }
 .screamer-name-input {
   flex: 1; margin-right: 8px;
@@ -1015,4 +1087,57 @@ html[lang="ru"] [data-i18n="home_tiktok_label"] { font-size: 0.72rem; }
   background: var(--accent-gradient);
   box-shadow: var(--shadow);
   pointer-events: none;
+}
+
+.toast-container {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  width: min(90%, 380px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--accent-color);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  pointer-events: auto;
+}
+
+.toast.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.toast-leaving {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  color: var(--accent-color);
+}
+
+.toast-text {
+  font-size: 0.8rem;
+  line-height: 1.42;
+  color: var(--text-main);
 }

@@ -21,7 +21,7 @@
   }
   #root {
     width: 400px;
-    padding: 14px 16px 16px;
+    padding: 8px 16px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -35,7 +35,7 @@
   .title {
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    font-size: 22px;
+    font-size: 24px;
     letter-spacing: 1px;
     text-align: center;
     line-height: 1.15;
@@ -47,17 +47,25 @@
   }
   .title small {
     display: block;
-    margin-top: 2px;
-    font-size: 11px;
+    margin-top: 1.5px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 4px;
     color: #c9c9c9;
     -webkit-text-fill-color: #c9c9c9;
   }
   .subtitle {
-    font-size: 12.5px;
+    font-size: 11px;
     color: #d6d6d6;
     text-align: center;
+    text-shadow: 0 1px 3px rgba(0,0,0,.85);
+  }
+  .total-votes {
+    font-size: 10px;
+    font-weight: 600;
+    color: #8A2BE2;
+    text-align: center;
+    margin-top: -4px;
     text-shadow: 0 1px 3px rgba(0,0,0,.85);
   }
   .candidates { width: 100%; display: flex; flex-direction: column; gap: 8px; }
@@ -72,6 +80,11 @@
     border-radius: 12px;
     padding: 10px 14px;
     box-shadow: 0 0 14px rgba(138, 43, 226, .25);
+    transition: border-color .3s ease, box-shadow .3s ease;
+  }
+  .candidate.leading {
+    border-color: var(--accent2);
+    box-shadow: 0 0 22px rgba(199, 21, 133, .65), 0 0 12px rgba(138, 43, 226, .4);
   }
   .fill {
     position: absolute;
@@ -97,7 +110,7 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .hint {
-    font-size: 11.5px;
+    font-size: 10px;
     color: #bdbdbd;
     text-align: center;
     line-height: 1.45;
@@ -110,6 +123,7 @@
   <div id="root">
     <div class="title" id="title">Scream<small>ON STREAM</small></div>
     <div class="subtitle" id="subtitle"></div>
+    <div class="total-votes" id="totalVotes"></div>
     <div class="candidates" id="candidates"></div>
     <div class="hint" id="hint"></div>
   </div>
@@ -122,10 +136,12 @@
     ru: {
       subtitle: 'Голосование за следующий скример',
       hint: 'Напиши в чат нужную цифру. Пожалуйста, не пиши название скримера — не порти сюрприз остальным 🤫',
+      totalVotes: (n) => `Всего голосов: ${n}`,
     },
     en: {
       subtitle: 'Vote for the next scare',
       hint: "Type the number in chat. Please don't type the screamer's name — don't spoil the surprise 🤫",
+      totalVotes: (n) => `Total votes: ${n}`,
     },
   };
 
@@ -134,12 +150,22 @@
 
   const root = document.getElementById('root');
   const candidatesEl = document.getElementById('candidates');
+  const totalVotesEl = document.getElementById('totalVotes');
   let wasActive = false;
 
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  function stripExt(fileName) {
+    const idx = fileName.lastIndexOf('.');
+    return idx > 0 ? fileName.slice(0, idx) : fileName;
+  }
+
+  function kindEmoji(kind) {
+    return kind === 'video' ? '🎥' : '🔊';
   }
 
   function render(state) {
@@ -155,17 +181,24 @@
         <div class="candidate">
           <div class="fill" id="fill-${i}"></div>
           <div class="badge">${i + 1}</div>
-          <div class="name">${escapeHtml(c.name)}</div>
+          <div class="name">${kindEmoji(c.kind)} ${escapeHtml(stripExt(c.name))}</div>
         </div>
       `).join('');
     }
     wasActive = true;
 
     const total = state.votes.reduce((a, b) => a + b, 0);
+    totalVotesEl.textContent = TEXT[lang].totalVotes(total);
+
+    const maxVotes = Math.max(...state.votes);
     state.candidates.forEach((_, i) => {
       const pct = total > 0 ? (state.votes[i] / total) * 100 : 100 / 3;
       const fillEl = document.getElementById(`fill-${i}`);
       if (fillEl) fillEl.style.width = pct + '%';
+      const candidateEl = fillEl ? fillEl.parentElement : null;
+      if (candidateEl) {
+        candidateEl.classList.toggle('leading', total > 0 && state.votes[i] === maxVotes);
+      }
     });
   }
 
@@ -175,7 +208,6 @@
       const state = await res.json();
       render(state);
     } catch (e) {
-      // Keep showing the last known state if the app is briefly unreachable.
     }
     setTimeout(poll, 800);
   }

@@ -10,6 +10,7 @@ use tauri::AppHandle;
 pub struct VoteCandidate {
     pub id: String,
     pub name: String,
+    pub kind: String,
 }
 
 #[derive(Default)]
@@ -49,16 +50,18 @@ pub fn start_vote_round(
     vote_state: tauri::State<VoteState>,
 ) -> Result<Vec<VoteCandidate>, String> {
     let list = media::list_screamers(app)?;
-    if list.len() < 3 {
-        return Err("Need at least 3 screamers in the library to start a vote".into());
+    let enabled: Vec<_> = list.into_iter().filter(|f| f.enabled).collect();
+    if enabled.len() < 3 {
+        return Err("Need at least 3 enabled screamers in the library to start a vote".into());
     }
 
     let mut rng = rand::thread_rng();
-    let chosen: Vec<VoteCandidate> = list
+    let chosen: Vec<VoteCandidate> = enabled
         .choose_multiple(&mut rng, 3)
         .map(|f| VoteCandidate {
             id: f.id.clone(),
             name: f.name.clone(),
+            kind: f.kind.clone(),
         })
         .collect();
 

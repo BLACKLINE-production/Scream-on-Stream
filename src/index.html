@@ -56,7 +56,6 @@
                 </div>
                 <p class="hint" data-i18n="home_interval_hint">We recommend a 3-minute minimum so you have time to get into the game before it finds you.</p>
                 <p class="hint hint-warning" data-i18n="home_screamers_warning">⚠️ Use "Borderless Window" display mode in your game — otherwise the screamers may not work correctly.</p>
-                <p class="hint" data-i18n="home_screamer_widget_bypass">Using the link below? You can skip the borderless-window tip above — Browser Sources don't need it.</p>
 
                 <p class="hint" data-i18n="home_screamer_widget_intro">You can also add screamers straight into OBS/TikTok Studio as a Browser Source — this avoids display-capture issues (like a black screen) some setups run into.</p>
 
@@ -116,7 +115,7 @@
                     </svg>
                   </button>
                 </div>
-                <p class="hint" data-i18n="home_screamer_widget_note">This runs alongside the regular full-screen popup — turn on whichever fits your setup, or both at once.</p>
+                <p class="hint" data-i18n="home_screamer_widget_note">If "Screen Capture" is selected as the display source, we recommend not connecting the overlay and leaving the "Screen Capture" source to avoid a repeated screamer on the stream.</p>
               </div>
             </div>
           </div>
@@ -205,9 +204,15 @@
           </div>
         </div>
 
-        <div class="card list-card">
+        <div class="card list-card" id="screamerListCard">
           <div class="list-header">
-            <span class="list-title" data-i18n="home_list_title">Screamers</span>
+            <div class="list-header-left">
+              <label class="screamer-check master-screamer-check" id="masterScreamerCheck" data-i18n-title="home_screamer_toggle_all" title="Enable/disable all screamers">
+                <input type="checkbox" id="masterScreamerCheckbox">
+                <span class="screamer-check-box"></span>
+              </label>
+              <span class="list-title" data-i18n="home_list_title">Screamers</span>
+            </div>
             <div class="list-header-actions">
               <button class="icon-btn icon-btn-ghost" id="refreshScreamersBtn" title="Refresh" type="button">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -247,17 +252,6 @@
         </div>
 
         <div class="card">
-          <div class="settings-item">
-            <span class="settings-label" data-i18n="settings_autostart">Launch on PC startup</span>
-            <label class="switch">
-              <input type="checkbox" id="toggleAutostart">
-              <span class="switch-slider"></span>
-            </label>
-          </div>
-          <p class="hint" style="margin-top:8px;" data-i18n="settings_autostart_hint">SoS will start automatically every time you turn on your PC — no need to open it manually before you go live.</p>
-        </div>
-
-        <div class="card">
           <span class="section-label" data-i18n="settings_connections">Connections</span>
 
           <div class="connection-row">
@@ -282,16 +276,38 @@
             <button class="connect-btn" id="tiktokBtn" type="button" data-i18n="settings_connect">Connect</button>
           </div>
 
-          <div class="connection-row disabled-row">
+          <div class="connection-row">
             <div class="connection-info">
               <span class="platform-icon" style="background:#FF0000">YT</span>
               <div class="connection-text">
                 <span class="connection-name" data-i18n="settings_youtube">YouTube</span>
-                <span class="connection-status" data-i18n="settings_soon">Coming soon</span>
+                <span class="connection-status" id="youtubeStatus" data-i18n="settings_not_connected">Not connected</span>
               </div>
             </div>
-            <button class="connect-btn" type="button" disabled data-i18n="settings_connect">Connect</button>
+            <button class="connect-btn" id="youtubeBtn" type="button" data-i18n="settings_connect">Connect</button>
           </div>
+
+          <div class="connection-row">
+            <div class="connection-info">
+              <span class="platform-icon" style="background:#53FC18;color:#000">KI</span>
+              <div class="connection-text">
+                <span class="connection-name" data-i18n="settings_kick">Kick</span>
+                <span class="connection-status" id="kickStatus" data-i18n="settings_not_connected">Not connected</span>
+              </div>
+            </div>
+            <button class="connect-btn" id="kickBtn" type="button" data-i18n="settings_connect">Connect</button>
+          </div>
+        </div>
+      
+        <div class="card">
+          <div class="settings-item">
+            <span class="settings-label" data-i18n="settings_autostart">Launch on PC startup</span>
+            <label class="switch">
+              <input type="checkbox" id="toggleAutostart">
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+          <p class="hint" style="margin-top:8px;" data-i18n="settings_autostart_hint">SoS will start automatically every time you turn on your PC — no need to open it manually before you go live.</p>
         </div>
 
         <div class="card">
@@ -419,6 +435,8 @@
       <button class="update-modal-confirm" id="updateModalCheckBtn" type="button" data-i18n="update_modal_check_btn">Check for updates</button>
     </div>
   </div>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <script type="module" src="/main.js"></script>
 </body>

@@ -302,9 +302,10 @@ pub async fn start_random_scares(
             if let Some(id) = winner_id {
                 let _ = fire_scare(&app, &id).await;
             } else if let Ok(list) = media::list_screamers(app.clone()) {
-                if !list.is_empty() {
-                    let idx = rand::thread_rng().gen_range(0..list.len());
-                    let id = list[idx].id.clone();
+                let enabled: Vec<_> = list.into_iter().filter(|f| f.enabled).collect();
+                if !enabled.is_empty() {
+                    let idx = rand::thread_rng().gen_range(0..enabled.len());
+                    let id = enabled[idx].id.clone();
                     let _ = fire_scare(&app, &id).await;
                 }
             }

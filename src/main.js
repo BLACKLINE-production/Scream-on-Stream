@@ -113,8 +113,7 @@ const translations = {
     home_interval_label: 'Scare interval (minutes)',
     home_interval_hint: 'We recommend a 3-minute minimum so you have time to get into the game before it finds you.',
     home_screamers_warning: '⚠️ Use "Borderless Window" display mode in your game — otherwise the screamers may not work correctly.',
-    home_screamer_widget_bypass: "Using the link below? You can skip the borderless-window tip above — Browser Sources don't need it.",
-    home_screamer_widget_intro: 'You can also add screamers straight into OBS/TikTok Studio as a Browser Source — this avoids display-capture issues (like a black screen) some setups run into.',
+    home_screamer_widget_intro: 'Screamers can also be added directly to OBS/TikTok Studio as a "Browser" source—this will allow you to display the screamer on your stream without having to show the entire screen.',
     home_screamer_obs_label: 'Connect screamers to OBS',
     home_screamer_obs_step1: 'Open OBS → Sources → click +',
     home_screamer_obs_step2: 'Select "Browser"',
@@ -128,7 +127,7 @@ const translations = {
     home_screamer_tiktok_step4: 'Set Width/Height to match your canvas resolution (e.g. 1920×1080)',
     home_screamer_tiktok_step5: 'Drag it to the very top of your Sources list, above your game/webcam',
     home_screamer_widget_link_label: 'Link to add the screamer overlay',
-    home_screamer_widget_note: 'This runs alongside the regular full-screen popup — turn on whichever fits your setup, or both at once.',
+    home_screamer_widget_note: 'If "Screen Capture" is selected as the display source, we recommend not connecting the overlay and leaving the "Screen Capture" source to avoid a repeated screamer on the stream.',
     home_chatvote_title: 'Chat Vote',
     home_chatvote_desc: 'Let viewers vote for the next scare',
     home_widget_compat: "Both guides work with the same widget — connect one or both, they run together with no conflict.",
@@ -147,6 +146,7 @@ const translations = {
     home_widget_link_label: 'Link to add the vote widget',
     home_widget_warning: "⚠️ Please don't peek at the widget while it's live — let's keep the surprise, the fear and the fun intact!",
     home_list_title: 'Screamers',
+    home_screamer_toggle_all: 'Enable/disable all screamers',
     home_volume_label: 'Master Volume',
     home_volume_hint: 'Applies to every screamer — videos and sounds alike.',
     settings_language: 'Language',
@@ -187,6 +187,16 @@ const translations = {
     connect_tiktok_subtitle: "We'll read your chat to count votes. No API key or sign-up needed — just your username.",
     connect_tiktok_label_username: 'TikTok username',
     connect_tiktok_placeholder_username: 'your username',
+    settings_kick: 'Kick',
+    kick_connect_error: "Couldn't connect to that Kick channel. Check the name and try again.",
+    connect_kick_title: 'Connect Kick',
+    connect_kick_subtitle: "We'll read your chat to count votes. No login needed — just your channel name.",
+    connect_kick_label: 'Channel name',
+    connect_kick_placeholder: 'your channel',
+    youtube_connect_opening: 'Opening browser…',
+    youtube_connect_waiting: 'Waiting for sign-in…',
+    youtube_connect_error: "Couldn't connect your YouTube account. Please try again.",
+    youtube_connect_not_configured: 'YouTube connection is not set up in this build yet.',
     connect_modal_confirm: 'Connect',
     connect_modal_connecting: 'Connecting…',
     settings_panic_title: 'Panic Button',
@@ -202,6 +212,7 @@ const translations = {
     update_modal_title: 'New version available?',
     update_modal_text: (version) => `Hey! Thanks for using SoS for about a month now. There's a good chance a new version has come out with cool new features. We recommend checking whether an update is available. Your current version: ${version}`,
     update_modal_check_btn: 'Check for updates',
+    screamer_toggle_notice: 'Screamers is currently running with the old list. Turn it off and back on above to apply this change.',
   },
   ru: {
     tab_home: 'Главная',
@@ -212,8 +223,7 @@ const translations = {
     home_interval_label: 'Интервал скримера (в минутах)',
     home_interval_hint: 'Рекомендуем минимум 3 минуты, чтобы успеть погрузиться в игру, прежде чем он тебя найдёт.',
     home_screamers_warning: '⚠️ Используй режим отображения «Оконный без рамки» в игре — иначе скримеры могут срабатывать некорректно.',
-    home_screamer_widget_bypass: 'Используешь ссылку ниже? Совет про оконный режим выше можно пропустить — источнику «Браузер» он не нужен.',
-    home_screamer_widget_intro: 'Скримеры также можно добавить прямо в OBS/TikTok Studio как источник «Браузер» — это исключает проблемы с захватом экрана (вроде чёрного фона), с которыми сталкиваются некоторые стримеры.',
+    home_screamer_widget_intro: 'Скримеры также можно добавить прямо в OBS/TikTok Studio как источник «Браузер» — это позволит отоброжать скример на стриме без демонстрации всего экрана на стриме.',
     home_screamer_obs_label: 'Подключение скримеров к OBS',
     home_screamer_obs_step1: 'Открой OBS → Источники → нажми +',
     home_screamer_obs_step2: 'Выбери «Браузер»',
@@ -227,7 +237,7 @@ const translations = {
     home_screamer_tiktok_step4: 'Задай Ширину/Высоту как у твоего холста (например, 1920×1080)',
     home_screamer_tiktok_step5: 'Перетащи источник в самый верх списка — выше игры/вебкамеры',
     home_screamer_widget_link_label: 'Ссылка для добавления оверлея скримеров',
-    home_screamer_widget_note: 'Работает параллельно с обычным полноэкранным попапом — включай то, что подходит именно тебе, или сразу оба варианта.',
+    home_screamer_widget_note: 'если в качестве источника отоброжения выбран "Захват экрана", советуем не подключать оверлей и оставить источник "Захват экрана", что бы избежать повторяющегося скримера на стриме.',
     home_chatvote_title: 'Голосование чата',
     home_chatvote_desc: 'Пусть зрители голосуют за следующий скример',
     home_widget_compat: 'Обе инструкции работают с одним и тем же виджетом — можно подключить одну или сразу обе, они не конфликтуют.',
@@ -246,6 +256,7 @@ const translations = {
     home_widget_link_label: 'Ссылка для добавления голосования',
     home_widget_warning: '⚠️ Пожалуйста, не подглядывай в виджет, пока он в эфире — давай сохраним интригу, страх и веселье!',
     home_list_title: 'Скримеры',
+    home_screamer_toggle_all: 'Включить/выключить все скримеры',
     home_volume_label: 'Общая громкость',
     home_volume_hint: 'Действует на все скримеры — и на видео, и на звуки.',
     settings_language: 'Язык',
@@ -286,6 +297,16 @@ const translations = {
     connect_tiktok_subtitle: 'Мы будем читать чат, чтобы считать голоса. Без API-ключа и регистрации — только юзернейм.',
     connect_tiktok_label_username: 'Юзернейм TikTok',
     connect_tiktok_placeholder_username: 'your username',
+    settings_kick: 'Kick',
+    kick_connect_error: 'Не удалось подключиться к этому каналу Kick. Проверьте название и попробуйте снова.',
+    connect_kick_title: 'Подключить Kick',
+    connect_kick_subtitle: 'Мы будем читать чат, чтобы считать голоса. Без входа в аккаунт — только название канала.',
+    connect_kick_label: 'Название канала',
+    connect_kick_placeholder: 'your channel',
+    youtube_connect_opening: 'Открываем браузер…',
+    youtube_connect_waiting: 'Ждём вход в аккаунт…',
+    youtube_connect_error: 'Не удалось подключить аккаунт YouTube. Попробуйте ещё раз.',
+    youtube_connect_not_configured: 'Подключение YouTube ещё не настроено в этой сборке.',
     connect_modal_confirm: 'Подключить',
     connect_modal_connecting: 'Подключение…',
     settings_panic_title: 'Паник-кнопка',
@@ -301,6 +322,7 @@ const translations = {
     update_modal_title: 'Вышла новая версия?',
     update_modal_text: (version) => `Привет, спасибо за использование SoS на протяжении уже месяца! Скорее всего, уже вышла новая версия этого приложения, в которой появились новые крутые функции. Рекомендуем проверить, не вышло ли обновление. Ваша текущая версия: ${version}`,
     update_modal_check_btn: 'Проверить',
+    screamer_toggle_notice: '«Скримеры» сейчас работают со старым списком. Выключите и снова включите функцию выше, чтобы изменения применились.',
   },
 };
 
@@ -337,6 +359,32 @@ function applyLanguage(lang) {
   }
   refreshUpdateModalText();
   localStorage.setItem('sos_lang', lang);
+}
+
+const toastContainer = document.getElementById('toastContainer');
+const TOAST_DURATION_MS = 5000;
+
+function showToast(message) {
+  if (!toastContainer || !message) return;
+
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <svg class="toast-icon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
+    <span class="toast-text"></span>
+  `;
+  toast.querySelector('.toast-text').textContent = message;
+  toastContainer.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add('toast-visible'));
+
+  const dismiss = () => {
+    toast.classList.remove('toast-visible');
+    toast.classList.add('toast-leaving');
+    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+  };
+
+  setTimeout(dismiss, TOAST_DURATION_MS);
 }
 
 const tabs = document.querySelectorAll('.tab-btn');
@@ -541,9 +589,27 @@ async function initMasterVolume() {
   }
 }
 
+function splitFileName(fileName) {
+  const idx = fileName.lastIndexOf('.');
+  if (idx <= 0) return { base: fileName, ext: '' };
+  return { base: fileName.slice(0, idx), ext: fileName.slice(idx) };
+}
+
+function screamerKindEmoji(kind) {
+  return kind === 'video' ? '🎥' : '🎵';
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 const screamerListEl = document.getElementById('screamerList');
+const screamerListCard = document.getElementById('screamerListCard');
 const addScreamerBtn = document.getElementById('addScreamerBtn');
 const refreshScreamersBtn = document.getElementById('refreshScreamersBtn');
+const masterScreamerCheckbox = document.getElementById('masterScreamerCheckbox');
 
 let screamers = [];
 
@@ -560,7 +626,36 @@ async function loadScreamers() {
 function renderScreamers() {
   screamerListEl.innerHTML = '';
   screamers.forEach((s) => screamerListEl.appendChild(createScreamerItem(s)));
+  updateMasterScreamerCheckbox();
 }
+
+function updateMasterScreamerCheckbox() {
+  if (!screamers.length) {
+    masterScreamerCheckbox.checked = false;
+    masterScreamerCheckbox.indeterminate = false;
+    masterScreamerCheckbox.disabled = true;
+    return;
+  }
+  masterScreamerCheckbox.disabled = false;
+  const enabledCount = screamers.filter((s) => s.enabled !== false).length;
+  masterScreamerCheckbox.checked = enabledCount === screamers.length;
+  masterScreamerCheckbox.indeterminate = enabledCount > 0 && enabledCount < screamers.length;
+}
+
+masterScreamerCheckbox.addEventListener('change', async () => {
+  const enabled = masterScreamerCheckbox.checked;
+  masterScreamerCheckbox.disabled = true;
+  try {
+    screamers = await invoke('set_all_screamers_enabled', { enabled });
+    renderScreamers();
+    if (toggleScreamersEl.checked) {
+      showToast(translations[currentLang].screamer_toggle_notice);
+    }
+  } catch (e) {
+    console.error('Failed to update all screamers enabled state:', e);
+    updateMasterScreamerCheckbox();
+  }
+});
 
 refreshScreamersBtn.addEventListener('click', async () => {
   if (refreshScreamersBtn.classList.contains('spinning')) return;
@@ -584,9 +679,16 @@ function createScreamerItem(screamer) {
   const item = document.createElement('div');
   item.className = 'screamer-item';
   item.dataset.id = screamer.id;
+  if (screamer.enabled === false) item.classList.add('screamer-disabled');
+
+  const { base: displayName } = splitFileName(screamer.name);
 
   item.innerHTML = `
-    <span class="screamer-name">${screamer.name}</span>
+    <label class="screamer-check" title="Enabled">
+      <input class="screamer-enabled-checkbox" type="checkbox" ${screamer.enabled === false ? '' : 'checked'}>
+      <span class="screamer-check-box"></span>
+    </label>
+    <span class="screamer-name"><span class="screamer-kind-emoji">${screamerKindEmoji(screamer.kind)}</span><span class="screamer-name-text">${escapeHtml(displayName)}</span></span>
     <input class="screamer-name-input hidden" type="text" value="${screamer.name}">
     <div class="screamer-actions">
       <button class="icon-btn-small test-btn" title="Test" type="button">
@@ -601,11 +703,30 @@ function createScreamerItem(screamer) {
     </div>
   `;
 
-  const nameSpan = item.querySelector('.screamer-name');
+  const enabledCheckbox = item.querySelector('.screamer-enabled-checkbox');
+  const nameTextEl = item.querySelector('.screamer-name-text');
   const nameInput = item.querySelector('.screamer-name-input');
   const testBtn = item.querySelector('.test-btn');
   const renameBtn = item.querySelector('.rename-btn');
   const deleteBtn = item.querySelector('.delete-btn');
+
+  enabledCheckbox.addEventListener('change', async () => {
+    const enabled = enabledCheckbox.checked;
+    item.classList.toggle('screamer-disabled', !enabled);
+    try {
+      await invoke('set_screamer_enabled', { id: screamer.id, enabled });
+      screamer.enabled = enabled;
+      updateMasterScreamerCheckbox();
+      if (toggleScreamersEl.checked) {
+        showToast(translations[currentLang].screamer_toggle_notice);
+      }
+    } catch (e) {
+      console.error('Failed to update screamer enabled state:', e);
+      enabledCheckbox.checked = !enabled;
+      item.classList.toggle('screamer-disabled', enabled);
+      updateMasterScreamerCheckbox();
+    }
+  });
 
   testBtn.addEventListener('click', async () => {
     try {
@@ -619,7 +740,8 @@ function createScreamerItem(screamer) {
     item.classList.add('editing');
     nameInput.classList.remove('hidden');
     nameInput.focus();
-    nameInput.select();
+    const { base } = splitFileName(screamer.name);
+    nameInput.setSelectionRange(0, base.length);
   });
 
   async function confirmRename() {
@@ -636,7 +758,8 @@ function createScreamerItem(screamer) {
       const updated = await invoke('rename_screamer', { id: screamer.id, newName });
       screamer.id = updated.id;
       screamer.name = updated.name;
-      nameSpan.textContent = screamer.name;
+      screamer.enabled = updated.enabled;
+      nameTextEl.textContent = splitFileName(screamer.name).base;
       item.dataset.id = screamer.id;
       nameInput.value = screamer.name;
     } catch (e) {
@@ -713,16 +836,44 @@ dropzone.addEventListener('click', async () => {
   }
 });
 
-getCurrentWebview().onDragDropEvent((event) => {
-  if (!addModal.classList.contains('visible')) return;
+function isPointInRect(x, y, rect) {
+  return rect.width > 0 && rect.height > 0
+    && x >= rect.left && x <= rect.right
+    && y >= rect.top && y <= rect.bottom;
+}
 
-  if (event.payload.type === 'over') {
-    dropzone.classList.add('drag-over');
-  } else if (event.payload.type === 'drop') {
-    dropzone.classList.remove('drag-over');
-    startNamingQueue(event.payload.paths || []);
+function physicalPositionToLogical(pos) {
+  const scale = window.devicePixelRatio || 1;
+  return { x: pos.x / scale, y: pos.y / scale };
+}
+
+getCurrentWebview().onDragDropEvent((event) => {
+  if (addModal.classList.contains('visible')) {
+    if (event.payload.type === 'over') {
+      dropzone.classList.add('drag-over');
+    } else if (event.payload.type === 'drop') {
+      dropzone.classList.remove('drag-over');
+      startNamingQueue(event.payload.paths || []);
+    } else {
+      dropzone.classList.remove('drag-over');
+    }
+    return;
+  }
+
+  if (event.payload.type === 'over' || event.payload.type === 'drop') {
+    const { x, y } = physicalPositionToLogical(event.payload.position);
+    const overList = isPointInRect(x, y, screamerListCard.getBoundingClientRect());
+
+    if (event.payload.type === 'over') {
+      screamerListCard.classList.toggle('drag-over', overList);
+    } else {
+      screamerListCard.classList.remove('drag-over');
+      if (overList) {
+        startNamingQueue(event.payload.paths || []);
+      }
+    }
   } else {
-    dropzone.classList.remove('drag-over');
+    screamerListCard.classList.remove('drag-over');
   }
 });
 
@@ -816,9 +967,11 @@ langSelect.addEventListener('change', () => {
   applyLanguage(langSelect.value);
 });
 
-const connectionState = { twitch: false, tiktok: false };
+const connectionState = { twitch: false, tiktok: false, youtube: false, kick: false };
 let twitchChannel = '';
 let tiktokUsername = '';
+let youtubeChannelTitle = '';
+let kickChannel = '';
 
 function refreshConnectionTexts() {
   const dict = translations[currentLang];
@@ -826,6 +979,10 @@ function refreshConnectionTexts() {
   const twitchStatus = document.getElementById('twitchStatus');
   const tiktokBtn = document.getElementById('tiktokBtn');
   const tiktokStatus = document.getElementById('tiktokStatus');
+  const youtubeBtn = document.getElementById('youtubeBtn');
+  const youtubeStatus = document.getElementById('youtubeStatus');
+  const kickBtn = document.getElementById('kickBtn');
+  const kickStatus = document.getElementById('kickStatus');
 
   twitchBtn.textContent = connectionState.twitch ? dict.settings_disconnect : dict.settings_connect;
   twitchBtn.classList.toggle('connected', connectionState.twitch);
@@ -840,6 +997,24 @@ function refreshConnectionTexts() {
     ? `${dict.settings_connected}${tiktokUsername ? ': ' + tiktokUsername : ''}`
     : dict.settings_not_connected;
   tiktokStatus.classList.toggle('connected', connectionState.tiktok);
+
+  if (youtubeBtn && youtubeStatus) {
+    youtubeBtn.textContent = connectionState.youtube ? dict.settings_disconnect : dict.settings_connect;
+    youtubeBtn.classList.toggle('connected', connectionState.youtube);
+    youtubeStatus.textContent = connectionState.youtube
+      ? `${dict.settings_connected}${youtubeChannelTitle ? ': ' + youtubeChannelTitle : ''}`
+      : dict.settings_not_connected;
+    youtubeStatus.classList.toggle('connected', connectionState.youtube);
+  }
+
+  if (kickBtn && kickStatus) {
+    kickBtn.textContent = connectionState.kick ? dict.settings_disconnect : dict.settings_connect;
+    kickBtn.classList.toggle('connected', connectionState.kick);
+    kickStatus.textContent = connectionState.kick
+      ? `${dict.settings_connected}${kickChannel ? ': ' + kickChannel : ''}`
+      : dict.settings_not_connected;
+    kickStatus.classList.toggle('connected', connectionState.kick);
+  }
 }
 
 document.getElementById('twitchBtn').addEventListener('click', async () => {
@@ -874,6 +1049,62 @@ document.getElementById('tiktokBtn').addEventListener('click', async () => {
   openConnectModal('tiktok');
 });
 
+const youtubeBtnEl = document.getElementById('youtubeBtn');
+if (youtubeBtnEl) {
+  youtubeBtnEl.addEventListener('click', async () => {
+    const dict = translations[currentLang];
+
+    if (connectionState.youtube) {
+      try {
+        await invoke('disconnect_youtube_chat');
+      } catch (e) {
+        console.error('Failed to disconnect YouTube chat:', e);
+      }
+      connectionState.youtube = false;
+      youtubeChannelTitle = '';
+      refreshConnectionTexts();
+      return;
+    }
+
+    youtubeBtnEl.disabled = true;
+    youtubeBtnEl.textContent = dict.youtube_connect_opening;
+    setTimeout(() => {
+      if (youtubeBtnEl.disabled) youtubeBtnEl.textContent = dict.youtube_connect_waiting;
+    }, 1500);
+
+    try {
+      const result = await invoke('connect_youtube_chat');
+      connectionState.youtube = true;
+      youtubeChannelTitle = (result && result.channel_title) || '';
+    } catch (e) {
+      console.error('Failed to connect YouTube chat:', e);
+      const message = typeof e === 'string' ? e : (e && e.message) || '';
+      alert(
+        message.includes('configured') ? dict.youtube_connect_not_configured : dict.youtube_connect_error
+      );
+    }
+
+    youtubeBtnEl.disabled = false;
+    refreshConnectionTexts();
+  });
+}
+
+document.getElementById('kickBtn').addEventListener('click', async () => {
+  if (connectionState.kick) {
+    try {
+      await invoke('disconnect_kick_chat');
+    } catch (e) {
+      console.error('Failed to disconnect Kick chat:', e);
+    }
+    connectionState.kick = false;
+    kickChannel = '';
+    refreshConnectionTexts();
+    return;
+  }
+
+  openConnectModal('kick');
+});
+
 const connectModal = document.getElementById('connectModal');
 const connectModalClose = document.getElementById('connectModalClose');
 const connectModalIcon = document.getElementById('connectModalIcon');
@@ -904,19 +1135,31 @@ function openConnectModal(platform) {
   if (platform === 'twitch') {
     connectModalIcon.textContent = 'TW';
     connectModalIcon.style.background = '#9146FF';
+    connectModalIcon.style.color = '';
     connectModalTitle.textContent = dict.connect_twitch_title;
     connectModalSubtitle.textContent = dict.connect_twitch_subtitle;
     connectModalLabel1.textContent = dict.connect_twitch_label;
     connectModalInput1.placeholder = dict.connect_twitch_placeholder;
     connectModalField2.classList.add('hidden');
     connectModalHint.classList.add('hidden');
-  } else {
+  } else if (platform === 'tiktok') {
     connectModalIcon.textContent = 'TT';
     connectModalIcon.style.background = '#000000';
+    connectModalIcon.style.color = '';
     connectModalTitle.textContent = dict.connect_tiktok_title;
     connectModalSubtitle.textContent = dict.connect_tiktok_subtitle;
     connectModalLabel1.textContent = dict.connect_tiktok_label_username;
     connectModalInput1.placeholder = dict.connect_tiktok_placeholder_username;
+    connectModalField2.classList.add('hidden');
+    connectModalHint.classList.add('hidden');
+  } else {
+    connectModalIcon.textContent = 'KI';
+    connectModalIcon.style.background = '#53FC18';
+    connectModalIcon.style.color = '#000';
+    connectModalTitle.textContent = dict.connect_kick_title;
+    connectModalSubtitle.textContent = dict.connect_kick_subtitle;
+    connectModalLabel1.textContent = dict.connect_kick_label;
+    connectModalInput1.placeholder = dict.connect_kick_placeholder;
     connectModalField2.classList.add('hidden');
     connectModalHint.classList.add('hidden');
   }
@@ -980,6 +1223,29 @@ async function submitConnectModal() {
       connectModalError.textContent = message.startsWith('not_live:')
         ? dict.tiktok_not_live_error
         : dict.tiktok_connect_error;
+      connectModalError.classList.remove('hidden');
+    }
+  } else if (activeConnectPlatform === 'kick') {
+    const channel = connectModalInput1.value.trim().replace(/^@/, '');
+    if (!channel) {
+      connectModalInput1.focus();
+      return;
+    }
+
+    connectModalConfirm.disabled = true;
+    connectModalConfirm.textContent = dict.connect_modal_connecting;
+    connectModalError.classList.add('hidden');
+
+    try {
+      await invoke('connect_kick_chat', { channel });
+      connectionState.kick = true;
+      kickChannel = channel;
+      refreshConnectionTexts();
+      closeConnectModal();
+      return;
+    } catch (e) {
+      console.error('Failed to connect to Kick chat:', e);
+      connectModalError.textContent = dict.kick_connect_error;
       connectModalError.classList.remove('hidden');
     }
   }

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -12,6 +13,7 @@ pub struct ScreamerFile {
     pub id: String,
     pub name: String,
     pub kind: String,
+    pub enabled: bool,
 }
 
 #[derive(Deserialize)]
@@ -33,6 +35,51 @@ fn videos_dir(app: &AppHandle) -> Result<PathBuf, String> {
 
 fn sounds_dir(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(media_root(app)?.join("Sounds"))
+}
+
+fn disabled_state_path(app: &AppHandle) -> Result<PathBuf, String> {
+    Ok(media_root(app)?.join(".disabled.json"))
+}
+
+fn load_disabled(app: &AppHandle) -> HashSet<String> {
+    let Ok(path) = disabled_state_path(app) else {
+        return HashSet::new();
+    };
+    let Ok(bytes) = fs::read(&path) else {
+        return HashSet::new();
+    };
+    serde_json::from_slice::<Vec<String>>(&bytes)
+        .map(|ids| ids.into_iter().collect())
+        .unwrap_or_default()
+}
+
+fn save_disabled(app: &AppHandle, disabled: &HashSet<String>) -> Result<(), String> {
+    let path = disabled_state_path(app)?;
+    let ids: Vec<&String> = disabled.iter().collect();
+    let bytes = serde_json::to_vec_pretty(&ids).map_err(|e| e.to_string())?;
+    fs::write(&path, bytes).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn set_screamer_enabled(app: AppHandle, id: String, enabled: bool) -> Result<(), String> {
+    let mut disabled = load_disabled(&app);
+    if enabled {
+        disabled.remove(&id);
+    } else {
+        disabled.insert(id);
+    }
+    save_disabled(&app, &disabled)
+}
+
+#[tauri::command]
+pub fn set_all_screamers_enabled(app: AppHandle, enabled: bool) -> Result<Vec<ScreamerFile>, String> {
+    if enabled {
+        save_disabled(&app, &HashSet::new())?;
+    } else {
+        let all_ids: HashSet<String> = list_screamers(app.clone())?.into_iter().map(|f| f.id).collect();
+        save_disabled(&app, &all_ids)?;
+    }
+    list_screamers(app)
 }
 
 pub fn ensure_media_dirs(app: &AppHandle) -> Result<(), String> {
@@ -82,17 +129,20 @@ fn classify(ext: &str) -> Option<&'static str> {
     }
 }
 
-fn list_dir(dir: &Path, kind: &str, prefix: &str) -> Vec<ScreamerFile> {
+fn list_dir(dir: &Path, kind: &str, prefix: &str, disabled: &HashSet<String>) -> Vec<ScreamerFile> {
     let Ok(entries) = fs::read_dir(dir) else { return vec![] };
     entries
         .flatten()
         .filter(|e| e.path().is_file())
         .filter_map(|e| {
             let name = e.file_name().to_str()?.to_string();
+            let id = format!("{prefix}/{name}");
+            let enabled = !disabled.contains(&id);
             Some(ScreamerFile {
-                id: format!("{prefix}/{name}"),
+                id,
                 name,
                 kind: kind.to_string(),
+                enabled,
             })
         })
         .collect()
@@ -101,8 +151,9 @@ fn list_dir(dir: &Path, kind: &str, prefix: &str) -> Vec<ScreamerFile> {
 #[tauri::command]
 pub fn list_screamers(app: AppHandle) -> Result<Vec<ScreamerFile>, String> {
     ensure_media_dirs(&app)?;
-    let mut items = list_dir(&videos_dir(&app)?, "video", "Videos");
-    items.extend(list_dir(&sounds_dir(&app)?, "audio", "Sounds"));
+    let disabled = load_disabled(&app);
+    let mut items = list_dir(&videos_dir(&app)?, "video", "Videos", &disabled);
+    items.extend(list_dir(&sounds_dir(&app)?, "audio", "Sounds", &disabled));
     Ok(items)
 }
 
@@ -179,17 +230,33 @@ pub fn rename_screamer(app: AppHandle, id: String, new_name: String) -> Result<S
     let folder = if id.starts_with("Videos") { "Videos" } else { "Sounds" };
     let kind = if folder == "Videos" { "video" } else { "audio" };
     let file_name = new_path.file_name().and_then(|n| n.to_str()).unwrap_or_default().to_string();
+    let new_id = format!("{folder}/{file_name}");
+
+    let mut disabled = load_disabled(&app);
+    let was_disabled = disabled.remove(&id);
+    if was_disabled {
+        disabled.insert(new_id.clone());
+    }
+    save_disabled(&app, &disabled)?;
+
     Ok(ScreamerFile {
-        id: format!("{folder}/{file_name}"),
+        id: new_id,
         name: file_name,
         kind: kind.to_string(),
+        enabled: !was_disabled,
     })
 }
 
 #[tauri::command]
 pub fn delete_screamer(app: AppHandle, id: String) -> Result<(), String> {
     let path = media_root(&app)?.join(&id);
-    fs::remove_file(path).map_err(|e| e.to_string())
+    fs::remove_file(path).map_err(|e| e.to_string())?;
+
+    let mut disabled = load_disabled(&app);
+    if disabled.remove(&id) {
+        save_disabled(&app, &disabled)?;
+    }
+    Ok(())
 }
 
 fn mime_for_ext(ext: &str) -> &'static str {

@@ -1,11 +1,13 @@
 mod autostart;
 mod hotkey;
+mod kick;
 mod media;
 mod scare;
 mod tiktok;
 mod ttwid;
 mod twitch;
 mod vote;
+mod youtube;
 
 use tauri::{
     menu::{Menu, MenuItem},
@@ -52,6 +54,8 @@ pub fn run() {
             media::add_screamer_files,
             media::rename_screamer,
             media::delete_screamer,
+            media::set_screamer_enabled,
+            media::set_all_screamers_enabled,
             scare::trigger_scare,
             scare::take_scare_media,
             scare::force_close_scare,
@@ -70,6 +74,10 @@ pub fn run() {
             twitch::disconnect_twitch_chat,
             tiktok::connect_tiktok_chat,
             tiktok::disconnect_tiktok_chat,
+            youtube::connect_youtube_chat,
+            youtube::disconnect_youtube_chat,
+            kick::connect_kick_chat,
+            kick::disconnect_kick_chat,
             hotkey::set_panic_hotkey,
             autostart::set_autostart,
             autostart::get_autostart_enabled,
